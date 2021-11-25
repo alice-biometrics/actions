@@ -1,0 +1,66 @@
+name: GKE Docker Build
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string 
+      tag:
+        required: true
+        type: string 
+      dockerfile:
+        required: false
+        type: string
+        default: docker/Dockerfile
+      additional_tag:
+        required: false
+        type: string
+        default: latest
+    secrets:
+      gke_project_id:
+        required: true
+      gke_service_account_key:
+        required: true
+      github_access_token:
+        required: false
+
+env:
+  TAG: ${{ inputs.tag }}
+  DOCKERFILE: ${{ inputs.dockerfile }}
+  IMAGE: eu.gcr.io/${{ secrets.gke_project_id}}/${{ inputs.image }}
+
+jobs:
+  gke-docker-build:
+    name: GKE Docker Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v2
+      - uses: google-github-actions/setup-gcloud@v0.2.1
+        with:
+          project_id:  ${{ secrets.gke_project_id }}
+          service_account_key: ${{ secrets.gke_service_account_key }}
+          export_default_credentials: true
+      - name: Gcloud Auth
+        run: gcloud auth configure-docker
+      - name: Build Docker
+        run: |
+          echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE})"
+          docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
+              --build-arg GITHUB_ACCESS_TOKEN=${{ secrets.github_access_token}} .
+          docker tag ${IMAGE}:${TAG} ${IMAGE}:latest
+          echo "Docker image is taged with ${IMAGE}:${TAG}"
+      - name: Check Docker 
+        uses: azure/container-scan@v0
+        with:
+          image-name: ${{env.IMAGE}}:${{env.TAG}}
+          run-quality-checks: True
+      - name: Publish Docker
+        run: docker push ${IMAGE}:${TAG}
+      - name: Tag & Publish The Additional Tag (Other)
+        if: ${{ inputs.additional_tag != '' }}
+        run: |
+          docker tag ${IMAGE}:${TAG} ${IMAGE}:${{inputs.additional_tag}}
+          docker push ${IMAGE}:${{inputs.additional_tag}} 
+          echo "Docker image is taged and published with ${IMAGE}:${{inputs.additional_tag}}"
