@@ -4,7 +4,7 @@
 
 Reusable Github Action to help on daily development! 
 
-### GKE Docker Build <img src="https://github.com/alice-biometrics/custom-emojis/blob/master/images/docker.png" width="18">
+### GKE Docker Build <img src="https://github.com/alice-biometrics/custom-emojis/blob/master/images/docker.png" width="20">
 
 This action builds an image, checks its vulnerabilities and then publish to a GKE registry.
 
@@ -25,12 +25,12 @@ Example
 
 ##### Inputs
 
-| Name          | Requirement | Default           | Description                         |
-| ------------- | ----------- | ----------------- | ----------------------------------- |
-| `image`       | _required_  |                   | Docker Image Name                   |
-| `tag`         | _required_  |                   | Tag or Version of the Docker Image  |
-| `dockerfile`  | _optional_  | docker/Dockerfile | Relative path to a dockerfile       |
-
+| Name             | Requirement | Default           | Description                                   |
+| ---------------- | ----------- | ----------------- | --------------------------------------------- |
+| `image`          | _required_  |                   | Docker Image Name                             |
+| `tag`            | _required_  |                   | Tag or Version of the Docker Image            |
+| `dockerfile`     | _optional_  | docker/Dockerfile | Relative path to a dockerfile                 |
+| `additional_tag` | _optional_  | latest            | Additional Tag to versioning the docker image |
 
 ##### Secrets
 
