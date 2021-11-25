@@ -16,7 +16,8 @@ Example
     with:
       image: my-image
       version: 1.0.0
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
+      working_directory: .
     secrets:
       gke_project_id: ${{ secrets.MY_GKE_PROJECT_ID }}
       gke_service_account_key: ${{ secrets.MY_GKE_SERVICE_ACCOUNT_KEY }}
