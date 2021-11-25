@@ -25,12 +25,13 @@ Example
 
 ##### Inputs
 
-| Name             | Requirement | Default           | Description                                   |
-| ---------------- | ----------- | ----------------- | --------------------------------------------- |
-| `image`          | _required_  |                   | Docker Image Name                             |
-| `tag`            | _required_  |                   | Tag or Version of the Docker Image            |
-| `dockerfile`     | _optional_  | docker/Dockerfile | Relative path to a dockerfile                 |
-| `additional_tag` | _optional_  | latest            | Additional Tag to versioning the docker image |
+| Name                | Requirement | Default    | Description                                               |
+| ------------------- | ----------- | ---------- | --------------------------------------------------------- |
+| `image`             | _required_  |            | Docker Image Name                                         |
+| `tag`               | _required_  |            | Tag or Version of the Docker Image                        |
+| `dockerfile`        | _optional_  | Dockerfile | Dockerfile name                                           |
+| `working_directory` | _optional_  | .          | Working directory where the docker build will be executed |
+| `additional_tag`    | _optional_  | latest     | Additional Tag to versioning the docker image             |
 
 ##### Secrets
 
