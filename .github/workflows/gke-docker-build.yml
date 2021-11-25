@@ -12,7 +12,11 @@ on:
       dockerfile:
         required: false
         type: string
-        default: docker/Dockerfile
+        default: Dockerfile
+      working_directory:
+        required: false
+        type: string
+        default: .
       additional_tag:
         required: false
         type: string
@@ -45,6 +49,7 @@ jobs:
       - name: Gcloud Auth
         run: gcloud auth configure-docker
       - name: Build Docker
+        working-directory: ${{inputs.working_directory}}
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE})"
           docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
