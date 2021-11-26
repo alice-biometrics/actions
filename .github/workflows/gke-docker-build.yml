@@ -21,6 +21,10 @@ on:
         required: false
         type: string
         default: latest
+      publish: 
+        required: false
+        type: boolean
+        default: true
     secrets:
       gke_project_id:
         required: true
@@ -61,11 +65,14 @@ jobs:
         with:
           image-name: ${{env.IMAGE}}:${{env.TAG}}
           run-quality-checks: True
-      - name: Publish Docker
-        run: docker push ${IMAGE}:${TAG}
-      - name: Tag & Publish The Additional Tag (Other)
+      - name: Add Additional Tag 
         if: ${{ inputs.additional_tag != '' }}
         run: |
           docker tag ${IMAGE}:${TAG} ${IMAGE}:${{inputs.additional_tag}}
-          docker push ${IMAGE}:${{inputs.additional_tag}} 
-          echo "Docker image is taged and published with ${IMAGE}:${{inputs.additional_tag}}"
+          echo "Docker image is taged with ${IMAGE}:${{inputs.additional_tag}}"
+      - name: Publish Docker
+        if: ${{ inputs.publish == true }}
+        run: docker push ${IMAGE}:${TAG}
+      - name: Publish Additional Tag
+        if: ${{ inputs.additional_tag != '' && inputs.publish == true }}
+        run: docker push ${IMAGE}:${{inputs.additional_tag}} 
