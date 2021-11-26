@@ -15,7 +15,7 @@ Example
     uses: alice-biometrics/actions/.github/workflows/gke-docker-build.yml@main
     with:
       image: my-image
-      version: 1.0.0
+      tag: 1.0.0
       dockerfile: Dockerfile
       working_directory: .
     secrets:
@@ -26,13 +26,15 @@ Example
 
 ##### Inputs
 
-| Name                | Requirement | Default    | Description                                               |
-| ------------------- | ----------- | ---------- | --------------------------------------------------------- |
-| `image`             | _required_  |            | Docker Image Name                                         |
-| `tag`               | _required_  |            | Tag or Version of the Docker Image                        |
-| `dockerfile`        | _optional_  | Dockerfile | Dockerfile name                                           |
-| `working_directory` | _optional_  | .          | Working directory where the docker build will be executed |
-| `additional_tag`    | _optional_  | latest     | Additional Tag to versioning the docker image             |
+| Name                | Requirement | Default    | Description                                                     |
+| ------------------- | ----------- | ---------- | --------------------------------------------------------------- |
+| `image`             | _required_  |            | Docker Image Name                                               |
+| `tag`               | _required_  |            | Tag or Version of the Docker Image                              |
+| `dockerfile`        | _optional_  | Dockerfile | Dockerfile name                                                 |
+| `working_directory` | _optional_  | .          | Working directory where the docker build will be executed       |
+| `additional_tag`    | _optional_  | latest     | Additional Tag to versioning the docker image                   |
+| `publish`           | _optional_  | true       | If true the workflow will publish tagged images to the registry |
+
 
 ##### Secrets
 
