@@ -36,6 +36,7 @@ on:
 env:
   TAG: ${{ inputs.tag }}
   DOCKERFILE: ${{ inputs.dockerfile }}
+  REGISTRY: eu.gcr.io/${{ secrets.gke_project_id}}
   IMAGE: eu.gcr.io/${{ secrets.gke_project_id}}/${{ inputs.image }}
   GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token}}
 
@@ -58,7 +59,7 @@ jobs:
         working-directory: ${{inputs.working_directory}}
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE})"
-          docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} .
+          docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} --build-arg REGISTRY=${REGISTRY} .
           echo "Docker image is taged with ${IMAGE}:${TAG}"
       - name: Docker Build With GITHUB_ACCESS_TOKEN
         if:  "${{ env.GITHUB_ACCESS_TOKEN != '' }}"
@@ -67,6 +68,7 @@ jobs:
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE}) with GITHUB_ACCESS_TOKEN"
           echo ${{ env.GITHUB_ACCESS_TOKEN}} > secret-github-access-token.txt
           DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
+           --build-arg REGISTRY=${REGISTRY} \
            --secret id=github-access-token,src=secret-github-access-token.txt .
           echo "Docker image is taged with ${IMAGE}:${TAG}"
       - name: Check Docker 
