@@ -66,16 +66,16 @@ Example
 
 ##### Inputs
 
-| Name                | Requirement | Default    | Description                                                     |
-| ------------------- | ----------- | ---------- | --------------------------------------------------------------- |
-| `language`          | _required_  |            | Select the language (Use python or node) Name                                               |
+| Name                    | Requirement | Default    | Description                                                     |
+| ----------------------- | ----------- | ---------- | --------------------------------------------------------------- |
+| `language`              | _required_  |            | Select the language (Use python or node)                        |
 | `lume_config_filename`  | _optional_  | lume.yml | In case you want to change the name of the lume configuration file or just store in another folder |
 
 
 ##### Secrets
 
-| Name              | Requirement | Description |
-| ----------------- | -----------| ----------- |
+| Name                   | Requirement | Description                                                                            |
+| ---------------------- | ----------- | -------------------------------------------------------------------------------------- |
 | `github_access_token`  | _optional_  | Only required if you need the token to be passed to requirements or dependency manager | 
 
 ##### Lume Config File (Required in your repository)
