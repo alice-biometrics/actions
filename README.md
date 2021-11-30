@@ -45,7 +45,7 @@ Example
 | `github_access_token`  | _optional_  | Only required if you need the token to be passed to your dockerfile |  
 
 
-### CI with Lume 🔥
+### Lume CI 🔥
 
 Performs continuos integrations steps using Python package `lume`. 
 This workflow will run the following steps:
