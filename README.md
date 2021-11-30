@@ -44,6 +44,67 @@ Example
 | `gke_service_account_key`   | _required_  | The service account key which will be used for authentication credentials. This key should be [created](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and stored as a [secret](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets). It can be encoded as a [Base64](https://en.wikipedia.org/wiki/Base64) string or as JSON. |
 | `github_access_token`  | _optional_  | Only required if you need the token to be passed to your dockerfile |  
 
+
+### CI with Lume 🔥
+
+Performs continuos integrations steps using Python package `lume`. 
+This workflow will run the following steps:
+  * lint 
+  * check-requirements
+  * unit tests
+  * integration tests
+  * acceptance tests
+
+Example
+
+```yml
+  ci:
+    uses: alice-biometrics/actions/.github/workflows/lume-ci.yml@main
+    with:
+      language: python
+```
+
+##### Inputs
+
+| Name                | Requirement | Default    | Description                                                     |
+| ------------------- | ----------- | ---------- | --------------------------------------------------------------- |
+| `language`          | _required_  |            | Select the language (Use python or node) Name                                               |
+| `lume_config_filename`  | _optional_  | lume.yml | In case you want to change the name of the lume configuration file or just store in another folder |
+
+
+##### Secrets
+
+| Name              | Requirement | Description |
+| ----------------- | -----------| ----------- |
+| `github_access_token`  | _optional_  | Only required if you need the token to be passed to requirements or dependency manager | 
+
+##### Lume Config File (Required in your repository)
+
+To make it work, it is necessary to have a lume file in the root with at least the following commands (Python example):
+
+```yml
+name: Testing
+
+install:
+  run: pip install --upgrade --upgrade-strategy eager -r requirements/dev-requirements.txt -r requirements/requirements.txt
+
+steps:
+  clean:
+    run: echo "clean"
+  lint:
+    run:
+      - black --check .
+      - flake8 tests
+  check-requirements:
+    run: safety check -r requirements/requirements.txt
+  test-unit:
+    run: echo "test-unit"
+  test-integration:
+    run: echo "test-integration"
+  test-acceptance:
+    run: echo "test-acceptance"
+```
+
 ## Contact :mailbox_with_mail:
 
 support@alicebiometrics.com

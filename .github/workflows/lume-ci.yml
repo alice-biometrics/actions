@@ -1,0 +1,72 @@
+name: Lume CI
+
+on:
+  workflow_call:
+    inputs:
+      language:
+        required: true
+        type: string
+        default: python
+        description: Select the language (Use python or node)
+      lume_config_filename: 
+        required: false
+        type: string
+        default: lume.yml
+    secrets:
+      github_access_token:
+        required: false
+
+env:
+  LUME_CONFIG_FILENAME: ${{ inputs.lume_config_filename}}
+  GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token}}
+
+jobs:
+  lume-ci:
+    name: Lume CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps: 
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        if: ${{ inputs.language == 'python' }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - uses: actions/cache@v2
+        if: ${{ inputs.language == 'python' }}
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('dev-requirements.txt') }}
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        if: ${{ inputs.language == 'node' }}
+        with:
+          node-version: 12
+          registry-url: https://npm.pkg.github.com
+          always-auth: true
+      - name: Get yarn cache directory path
+        if: ${{ inputs.language == 'node' }}
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - uses: actions/cache@v2
+        if: ${{ inputs.language == 'node' }}
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Lume
+        run: pip install lume 
+      - name: Install
+        run: lume -install 
+      - name: Check Requirements 
+        run: lume -check-requirements
+      - name: Lint
+        run: lume -lint
+      - name: Unit Tests
+        run: lume -test-unit
+      - name: Integration Tests
+        run: lume -test-integration
+      - name: Acceptance Tests
+        run: lume -test-acceptance
