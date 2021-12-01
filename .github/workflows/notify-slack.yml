@@ -15,12 +15,12 @@ on:
       color:
         required: false
         type: string
-        default: "good"
+        default: good
         description: "Some options [good, danger, #808080]" # '#ff0000' # red
       icon:
         required: false
         type: string
-        default: "https://raw.githubusercontent.com/alice-biometrics/custom-emojis/master/images/alice_bot.png"
+        default: https://raw.githubusercontent.com/alice-biometrics/custom-emojis/master/images/alice_bot.png
       username:
         required: false
         type: string
@@ -34,7 +34,7 @@ env:
   SLACK_TITLE: ${{ inputs.title }}  
   SLACK_MESSAGE: ${{ inputs.message }}  
   SLACK_USERNAME: ${{ inputs.username }}  
-  SLACK_ICON: ${{ inputs.message }}  
+  SLACK_ICON: ${{ inputs.icon }}  
   SLACK_FOOTER: 'Repository: ${{ github.repository }}'
   SLACK_COLOR: ${{ inputs.color }}  
 
