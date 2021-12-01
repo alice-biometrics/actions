@@ -1,0 +1,58 @@
+name: Notify Slack
+
+on:
+  workflow_call:
+    inputs:
+      channel:
+        required: true
+        type: string
+      title:
+        required: true
+        type: string 
+      message:
+        required: true
+        type: string
+      color:
+        required: false
+        type: string
+        default: "good"
+        description: "Some options [good, danger, #808080]" # '#ff0000' # red
+      icon:
+        required: false
+        type: string
+        default: "https://raw.githubusercontent.com/alice-biometrics/custom-emojis/master/images/alice_bot.png"
+      username:
+        required: false
+        type: string
+        default: Alice Bot
+    secrets:
+      slack_token:
+        required: true
+
+env:
+  SLACK_CHANNEL: ${{ inputs.channel }}  
+  SLACK_TITLE: ${{ inputs.title }}  
+  SLACK_MESSAGE: ${{ inputs.message }}  
+  SLACK_USERNAME: ${{ inputs.username }}  
+  SLACK_ICON: ${{ inputs.message }}  
+  SLACK_FOOTER: 'Repository: ${{ github.repository }}'
+  SLACK_COLOR: ${{ inputs.color }}  
+
+jobs:
+  notify-slack:
+    name: Notify Slack
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Slack Notification
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_CHANNEL:  ${{ env.SLACK_CHANNEL }}
+        SLACK_USERNAME: ${{ env.SLACK_USERNAME }}
+        SLACK_TITLE: ${{ env.SLACK_TITLE }}
+        SLACK_MESSAGE: ${{ env.SLACK_MESSAGE }}
+        SLACK_COLOR: ${{ env.SLACK_COLOR }}
+        SLACK_ICON: ${{ env.SLACK_ICON }}
+        SLACK_WEBHOOK: ${{ secrets.slack_token }}
+        MSG_MINIMAL: true
+        SLACK_FOOTER: ${{ env.SLACK_FOOTER }}

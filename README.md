@@ -105,6 +105,43 @@ steps:
     run: echo "test-acceptance"
 ```
 
+### Notify Slack 💬
+
+This action sends a slack notification to a selected channel.
+This actions is a wrapper of the [slack-notify action](https://github.com/marketplace/actions/slack-notify).
+
+Example
+
+```yml
+  build:
+    uses: alice-biometrics/actions/.github/workflows/notify-slack.yml@main
+    with:
+      channel: my-slack-channel
+      title: Success on Service Deploy
+      message: 'New version deployed (v1.1.1)'
+    secrets:
+      slack_token: ${{ secrets.MY_SLACK_TOKEN }}
+```
+
+##### Inputs
+
+| Name        | Requirement | Default      | Description                           |
+| ----------- | ----------- | ------------ | ------------------------------------- |
+| `channel`   | _required_  |              | Channel to send the message |
+| `title`     | _required_  |              | Title to use |
+| `message`   | _required_  |              | Message to use|
+| `color`     | _optional_  | good (green) | Some options [good, danger, #808080] |
+| `icon`      | _optional_  | <img src="https://github.com/alice-biometrics/custom-emojis/blob/master/images/alice_bot.png" width="20">   | Path to a icon image|
+| `username`  | _optional_  | Alice Bot    | Slack Username sending the message.  |
+
+
+##### Secrets
+
+| Name              | Requirement | Description |
+| ----------------- | -----------| ----------- |
+| `slack_token`     | _required_   | Credentials to access to slack channel |
+
+
 ## Contact :mailbox_with_mail:
 
 support@alicebiometrics.com
