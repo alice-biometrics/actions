@@ -1,0 +1,44 @@
+name: Helm Update Docker Image
+
+on:
+  workflow_call:
+    inputs:
+      chart:
+        required: true
+        type: string 
+      environment:
+        required: true
+        type: string 
+        default: staging
+      version:
+        required: true
+        type: string 
+    secrets:
+      github_access_token:
+        required: false
+
+jobs:
+  chart-helm-update-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Helm Chart Repo
+        uses: actions/checkout@v2
+        with:
+          repository: alice-biometrics/alice-k8s-cloud
+          token: ${{ secrets.github_access_token}}   
+
+      - name: Update Docker Image
+        run: |
+          echo "Updating docker image on chart ${{github.event.inputs.chart}} (environment: ${{github.event.inputs.environment}}) to ${{github.event.inputs.version}}"
+          cd ${{github.event.inputs.chart}}/chart
+          sed -ri 's/^(\s*)(tag:.*$)/\1tag: ${{github.event.inputs.version}}/' values-${{github.event.inputs.environment}}.yaml
+          git add -u
+          git config --global user.email "dev@alicebiometrics.com"
+          git config --global user.name "Alice Biometrics"
+          git commit -m "ENH. ${{github.event.inputs.chart}}. Update image to ${{github.event.inputs.version}} (${{github.event.inputs.environment}})"
+
+      - name: Push changes
+        uses: alice-biometrics/github-push-action@master
+        with:
+          github_token: ${{ secrets.github_access_token}} 
+          repository: alice-biometrics/alice-k8s-cloud
