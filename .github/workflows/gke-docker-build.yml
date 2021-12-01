@@ -54,15 +54,19 @@ jobs:
           export_default_credentials: true
       - name: Gcloud Auth
         run: gcloud auth configure-docker
+      - name: Check if docker image already exists
+        id: check-build-status
+        continue-on-error: true
+        run: docker manifest inspect ${IMAGE}:${TAG} > /dev/null
       - name: Docker Build
-        if:  "${{ env.GITHUB_ACCESS_TOKEN == '' }}"
+        if:  ${{ env.GITHUB_ACCESS_TOKEN == '' && steps.check-build-status.outcome == 'failure' }}
         working-directory: ${{inputs.working_directory}}
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE})"
           docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} --build-arg REGISTRY=${REGISTRY} .
           echo "Docker image is taged with ${IMAGE}:${TAG}"
       - name: Docker Build With GITHUB_ACCESS_TOKEN
-        if:  "${{ env.GITHUB_ACCESS_TOKEN != '' }}"
+        if:  ${{ env.GITHUB_ACCESS_TOKEN != '' && steps.check-build-status.outcome == 'failure'}}
         working-directory: ${{inputs.working_directory}}
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE}) with GITHUB_ACCESS_TOKEN"
@@ -72,18 +76,20 @@ jobs:
            --secret id=github-access-token,src=secret-github-access-token.txt .
           echo "Docker image is taged with ${IMAGE}:${TAG}"
       - name: Check Docker 
+        if:  ${{ steps.check-build-status.outcome == 'failure' }}
         uses: azure/container-scan@v0
         with:
           image-name: ${{env.IMAGE}}:${{env.TAG}}
           run-quality-checks: True
       - name: Add Additional Tag 
-        if: ${{ inputs.additional_tag != '' }}
+        if: ${{ inputs.additional_tag != '' &&  steps.check-build-status.outcome == 'failure' }}
         run: |
           docker tag ${IMAGE}:${TAG} ${IMAGE}:${{inputs.additional_tag}}
           echo "Docker image is taged with ${IMAGE}:${{inputs.additional_tag}}"
       - name: Publish Docker
-        if: ${{ inputs.publish == true }}
+        if: ${{ inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
         run: docker push ${IMAGE}:${TAG}
       - name: Publish Additional Tag
-        if: ${{ inputs.additional_tag != '' && inputs.publish == true }}
+        if: ${{ inputs.additional_tag != '' && inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
         run: docker push ${IMAGE}:${{inputs.additional_tag}} 
+

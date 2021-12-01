@@ -6,7 +6,7 @@ Reusable Github Action to help on daily development!
 
 ### GKE Docker Build <img src="https://github.com/alice-biometrics/custom-emojis/blob/master/images/docker.png" width="20">
 
-This action builds an image, checks its vulnerabilities and then publish to a GKE registry.
+This action builds an image, checks its vulnerabilities and then publish to a GKE registry. If the image is already published, the workflow will skip unnecessary steps.
 
 Example
 
