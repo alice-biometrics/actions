@@ -31,10 +31,10 @@ jobs:
 
       - name: Chart Helm Linter
         id: linter
-        run: helm lint ${{github.event.inputs.chart}}/chart/ -f ${{github.event.inputs.chart}}/chart/${{github.event.inputs.environment}}
+        run: helm lint ${{github.event.inputs.chart}}/chart/ -f ${{github.event.inputs.chart}}/chart/values-${{github.event.inputs.environment}}
 
       - name: Create kind cluster for testing Chart
         uses: helm/kind-action@v1.2.0
 
       - name: Chart Helm Deploy
-        run: helm install ${{github.event.inputs.chart}} ${{github.event.inputs.chart}}/chart/ -f ${{github.event.inputs.chart}}/chart/${{github.event.inputs.environment}}
+        run: helm install ${{github.event.inputs.chart}} ${{github.event.inputs.chart}}/chart/ -f ${{github.event.inputs.chart}}/chart/values-${{github.event.inputs.environment}}
