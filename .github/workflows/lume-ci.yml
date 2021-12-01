@@ -62,6 +62,8 @@ jobs:
         run: lume -install 
       - name: Check Requirements 
         run: lume -check-requirements
+      - name: Static Analysis
+        run: lume -static-analysis
       - name: Lint
         run: lume -lint
       - name: Unit Tests
