@@ -29,14 +29,13 @@ jobs:
 
       - name: Update Docker Image
         run: |
-          echo "Updating docker image on chart ${{github.event.inputs.chart}} (environment: ${{github.event.inputs.environment}}) to ${{github.event.inputs.version}}"
-          cd ${{github.event.inputs.chart}}/chart
-          sed -ri 's/^(\s*)(tag:.*$)/\1tag: ${{github.event.inputs.version}}/' values-${{github.event.inputs.environment}}.yaml
+          echo "Updating docker image on chart ${{inputs.chart}} (environment: ${{inputs.environment}}) to ${{inputs.version}}"
+          cd ${{inputs.chart}}/chart
+          sed -ri 's/^(\s*)(tag:.*$)/\1tag: ${{inputs.version}}/' values-${{inputs.environment}}.yaml
           git add -u
           git config --global user.email "dev@alicebiometrics.com"
           git config --global user.name "Alice Biometrics"
-          git commit -m "ENH. ${{github.event.inputs.chart}}. Update image to ${{github.event.inputs.version}} (${{github.event.inputs.environment}})"
-
+          git commit -m "ENH. ${{inputs.chart}}. Update image to ${{inputs.version}} (${{inputs.environment}})"
       - name: Push changes
         uses: alice-biometrics/github-push-action@master
         with:
