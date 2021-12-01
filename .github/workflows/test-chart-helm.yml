@@ -1,0 +1,40 @@
+name: Helm Testing
+
+on:
+  workflow_call:
+    inputs:
+      chart:
+        required: true
+        type: string 
+      environment:
+        required: true
+        type: string 
+        default: values-staging.yaml
+    secrets:
+      github_access_token:
+        required: false
+
+jobs:
+  chart-helm-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.4.0
+
+      - name: Checkout Helm Chart Repo
+        uses: actions/checkout@v2
+        with:
+          repository: alice-biometrics/alice-k8s-cloud
+          token: ${{ secrets.github_access_token}}   
+
+      - name: Chart Helm Linter
+        id: linter
+        run: helm lint ${{github.event.inputs.chart}}/chart/ -f ${{github.event.inputs.chart}}/chart/${{github.event.inputs.environment}}
+
+      - name: Create kind cluster for testing Chart
+        uses: helm/kind-action@v1.2.0
+
+      - name: Chart Helm Deploy
+        run: helm install ${{github.event.inputs.chart}} ${{github.event.inputs.chart}}/chart/ -f ${{github.event.inputs.chart}}/chart/${{github.event.inputs.environment}}
