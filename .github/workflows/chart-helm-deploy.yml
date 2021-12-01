@@ -10,19 +10,17 @@ on:
         required: true
         type: string 
         default: staging
-      gke_zone:
-        required: true 
-        type: string
-        default: europe-west1-b
-      gke_project:
-        required: true
-        type: string
-        default: alice-cloud-staging
     secrets:
       github_access_token:
-        required: false
+        required: true
       gke_key:
-        required: false
+        required: true
+      gke_project:
+        required: true
+      gke_zone:
+        required: true 
+      gke_cluster_prefix:
+        required: true
 
 jobs:
   chart-helm-test:
@@ -41,7 +39,7 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v0.2.1
         with:
-          project_id:  ${{inputs.gke_project}}
+          project_id:  ${{secrets.gke_project}}
           service_account_key: ${{ secrets.gke_key }}
           export_default_credentials: true
 
@@ -50,7 +48,7 @@ jobs:
 
       - name: Helm Deploy
         run: |
-          gcloud container clusters get-credentials alice-cluster-${{inputs.environment}} --zone ${{inputs.gke_zone}} --project ${{inputs.gke_project}}
+          gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
           helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml --dry-run --namespace ${{inputs.environment}}
 
       # - name: Rollback

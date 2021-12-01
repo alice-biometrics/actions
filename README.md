@@ -19,8 +19,8 @@ Example
       dockerfile: Dockerfile
       working_directory: .
     secrets:
-      gke_project_id: ${{ secrets.MY_GKE_PROJECT_ID }}
-      gke_service_account_key: ${{ secrets.MY_GKE_SERVICE_ACCOUNT_KEY }}
+      gke_project: ${{ secrets.MY_GKE_PROJECT }}
+      gke_key: ${{ secrets.MY_GKE_SERVICE_ACCOUNT_KEY }}
       github_access_token: ${{ secrets.MY_GITHUB_ACCESS_TOKEN }}
 ```
 
@@ -40,8 +40,8 @@ Example
 
 | Name              | Requirement | Description |
 | ----------------- | -----------| ----------- |
-| `gke_project_id`  | _required_   | ID of the Google Cloud Platform project. If provided, this will configure `gcloud` to use this project ID by default for commands. Individual commands can still override the project using the `--project` flag which takes precedence. |
-| `gke_service_account_key`   | _required_  | The service account key which will be used for authentication credentials. This key should be [created](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and stored as a [secret](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets). It can be encoded as a [Base64](https://en.wikipedia.org/wiki/Base64) string or as JSON. |
+| `gke_project`  | _required_   | ID of the Google Cloud Platform project. If provided, this will configure `gcloud` to use this project ID by default for commands. Individual commands can still override the project using the `--project` flag which takes precedence. |
+| `gke_key`   | _required_  | The service account key which will be used for authentication credentials. This key should be [created](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and stored as a [secret](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets). It can be encoded as a [Base64](https://en.wikipedia.org/wiki/Base64) string or as JSON. |
 | `github_access_token`  | _optional_  | Only required if you need the token to be passed to your dockerfile |  
 
 
