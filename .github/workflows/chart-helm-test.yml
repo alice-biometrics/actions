@@ -37,11 +37,12 @@ jobs:
         id: linter
         run: helm lint ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
 
-      - name: Chart Helm Deploy
-        if: test_deploy
-        uses: alice-biometrics/actions/.github/workflows/chart-helm-test-deploy.yml@main
-        with:
-          chart: ${{inputs.chart}}
-          environment: ${{inputs.environment}}
-        secrets:
-          github_access_token: ${{secrets.github_access_token}} 
+  chart-helm-test-deploy:
+    needs: chart-helm-test
+    if: test_deploy
+    uses: alice-biometrics/actions/.github/workflows/chart-helm-test-deploy.yml@main
+    with:
+      chart: ${{inputs.chart}}
+      environment: ${{inputs.environment}}
+    secrets:
+      github_access_token: ${{secrets.github_access_token}} 
