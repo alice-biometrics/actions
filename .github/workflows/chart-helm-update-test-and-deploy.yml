@@ -9,7 +9,9 @@ on:
       environment:
         required: true
         type: string 
-        default: staging
+      version:
+        required: true
+        type: string
       test_deploy:
         required: false
         type: boolean
@@ -27,19 +29,27 @@ on:
         required: true
 
 jobs:
+  chart-helm-update:
+    uses: alice-biometrics/actions/.github/workflows/chart-helm-update-docker-image.yml@main
+    with:
+      chart: ${{inputs.chart}}
+      environment: ${{inputs.environment}}
+      version: ${{inputs.version}}
+    secrets:
+      github_access_token: ${{secrets.github_access_token}} 
+
   chart-helm-test:
-    needs: chart-helm-test
-    if: test_deploy
+    needs: chart-helm-update
     uses: alice-biometrics/actions/.github/workflows/chart-helm-test.yml@main
     with:
       chart: ${{inputs.chart}}
       environment: ${{inputs.environment}}
+      test_deploy: ${{inputs.test_deploy}}
     secrets:
       github_access_token: ${{secrets.github_access_token}} 
 
   chart-helm-deploy:
     needs: chart-helm-test
-    if: test_deploy
     uses: alice-biometrics/actions/.github/workflows/chart-helm-deploy.yml@main
     with:
       chart: ${{inputs.chart}}
