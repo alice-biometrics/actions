@@ -233,19 +233,6 @@ Example
       github_access_token: ${{ secrets.MY_GITHUB_ACCESS_TOKEN }}
 ```
 
-    inputs:
-      version:
-        required: true
-        type: string
-        description: Version of the application
-      deploy_timestamp:
-        required: true
-        type: string
-        description: Deploy timestamps (you can obtained with date -u --rfc-3339=seconds)
-    secrets:
-      github_access_token:
-        required: true
-
 
 ##### Inputs
 
