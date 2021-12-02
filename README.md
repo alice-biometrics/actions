@@ -174,7 +174,7 @@ Example
 
 ---
 
-### Get Version
+### Get Version 🏷️
 
 This action obtains the version from tags, commits and releases.
 
@@ -217,7 +217,7 @@ print-version:
 
 ---
 
-### Commit Changes 
+### Commit Changes ✍️
 
 This action modify two files (VERSION, DEPLOY) and push changes to the repository.
 
