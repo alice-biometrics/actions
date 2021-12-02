@@ -34,6 +34,25 @@ Example
 | `working_directory` | _optional_  | .          | Working directory where the docker build will be executed       |
 | `additional_tag`    | _optional_  | latest     | Additional Tag to versioning the docker image                   |
 | `publish`           | _optional_  | true       | If true the workflow will publish tagged images to the registry |
+| `timeout_minutes`.  | _optional_  | 30         | Timeout to cancel the workflow |
+| `update_version_and_deploy_files` | _optional_  | true | This option update app/VERSION and app/DEPLOY files |
+
+##### Outputs
+
+| Name              | Description                                 |
+| ----------------- | --------------------------------------------| 
+| `build_timestamp` | Timestamp for the time just prior to build. Only valid if input `update_version_and_deploy_files` is true  | 
+
+Example to get this output
+
+```yml
+test-output:
+    needs: job-where-gke-build-is-executed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Output
+        run: echo "Output ${{ needs.job-where-gke-build-is-executed.build_timestamp }}"
+```
 
 
 ##### Secrets

@@ -25,6 +25,18 @@ on:
         required: false
         type: boolean
         default: true
+      update_version_and_deploy_files:
+        required: false
+        type: boolean
+        default: true
+      timeout_minutes: 
+        required: false
+        type: number
+        default: 30
+    outputs:
+      build_timestamp:
+        description: "Timestamp for the time just prior to build"
+        value: ${{ jobs.gke-docker-build.outputs.build_timestamp }}
     secrets:
       gke_project:
         required: true
@@ -44,7 +56,9 @@ jobs:
   gke-docker-build:
     name: GKE Docker Build
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    outputs:
+      build_timestamp: ${{ steps.update_version_and_deploy_files.outputs.build_timestamp }}
     steps:
       - uses: actions/checkout@v2
       - uses: google-github-actions/setup-gcloud@v0.2.1
@@ -58,6 +72,15 @@ jobs:
         id: check-build-status
         continue-on-error: true
         run: docker manifest inspect ${IMAGE}:${TAG} > /dev/null
+      - name: Update VERSION and DEPLOY Files 
+        if: ${{ inputs.update_version_and_deploy_files == true && steps.check-build-status.outcome == 'failure'}}
+        id: update_version_and_deploy_files
+        working-directory: ${{inputs.working_directory}}
+        run: |
+          BUILD_TIMESTAMP=$(date -u --rfc-3339=seconds)
+          echo ${TAG} > app/VERSION
+          echo ${BUILD_TIMESTAMP} > app/DEPLOY
+          echo "::set-output name=build_timestamp::${BUILD_TIMESTAMP}"
       - name: Docker Build
         if:  ${{ env.GITHUB_ACCESS_TOKEN == '' && steps.check-build-status.outcome == 'failure' }}
         working-directory: ${{inputs.working_directory}}
