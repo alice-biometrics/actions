@@ -43,17 +43,25 @@ Example
 | ----------------- | --------------------------------------------| 
 | `build_timestamp` | Timestamp for the time just prior to build. Only valid if input `update_version_and_deploy_files` is true  | 
 
-Example to get this output
+Example to get this output:
 
 ```yml
-test-output:
-    needs: job-where-gke-build-is-executed
+build:
+  uses: alice-biometrics/actions/.github/workflows/gke-docker-build.yml@main
+  with:
+    image: my-image
+    tag: 1.0.0
+  secrets:
+    gke_project: ${{ secrets.MY_GKE_PROJECT }}
+    gke_key: ${{ secrets.MY_GKE_SERVICE_ACCOUNT_KEY }}
+    github_access_token: ${{ secrets.MY_GITHUB_ACCESS_TOKEN }}
+print-build-timestamp:
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Print Output
-        run: echo "Output ${{ needs.job-where-gke-build-is-executed.build_timestamp }}"
+      - name: Print Build Timestamp
+        run: echo "Build Timestamp: ${{ needs.build.build_timestamp }}"
 ```
-
 
 ##### Secrets
 
@@ -63,6 +71,7 @@ test-output:
 | `gke_key`   | _required_  | The service account key which will be used for authentication credentials. This key should be [created](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and stored as a [secret](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets). It can be encoded as a [Base64](https://en.wikipedia.org/wiki/Base64) string or as JSON. |
 | `github_access_token`  | _optional_  | Only required if you need the token to be passed to your dockerfile |  
 
+---
 
 ### Lume CI 🔥
 
@@ -124,6 +133,8 @@ steps:
     run: echo "test-acceptance"
 ```
 
+---
+
 ### Notify Slack 💬
 
 This action sends a slack notification to a selected channel.
@@ -159,6 +170,96 @@ Example
 | Name              | Requirement | Description |
 | ----------------- | -----------| ----------- |
 | `slack_token`     | _required_   | Credentials to access to slack channel |
+
+
+---
+
+### Get Version
+
+This action obtains the version from tags, commits and releases.
+
+Example
+
+```yml
+  get-version:
+    uses: alice-biometrics/actions/.github/workflows/get-version.yml@main
+    with:
+      type: commit
+```
+
+##### Inputs
+
+| Name        | Requirement | Default | Description                           |
+| ----------- | ----------- | ------- | ------------------------------------- |
+| `type`      | _required_  |         | Two options [commit, release]. If uses `commit` it returns the version from latest tag and latest commit (e.g `0.0.1-4c5ff17a`). If uses `release` it returns a version obtained from latest tag created on a github release (e.g `0.0.2`)  |
+
+
+##### Outputs
+
+| Name         | Description                |
+| -------------| ---------------------------| 
+| `version`    | Version obtained from git  | 
+
+Example to get this output:
+
+```yml
+get-version:
+  uses: alice-biometrics/actions/.github/workflows/get-version.yml@main
+  with:
+    type: merge
+print-version:
+    needs: get-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Version
+        run: echo "Version: ${{ needs.get-version.version }}"
+```
+
+---
+
+### Commit Changes 
+
+This action modify two files (VERSION, DEPLOY) and push changes to the repository.
+
+Example
+
+```yml
+  commit-changes:
+    uses: alice-biometrics/actions/.github/workflows/commit-changes.yml@main
+    with:
+      version: 1.0.0
+      deploy_timestamp: 2021-12-02 09:56:29+00:00
+    secrets:
+      github_access_token: ${{ secrets.MY_GITHUB_ACCESS_TOKEN }}
+```
+
+    inputs:
+      version:
+        required: true
+        type: string
+        description: Version of the application
+      deploy_timestamp:
+        required: true
+        type: string
+        description: Deploy timestamps (you can obtained with date -u --rfc-3339=seconds)
+    secrets:
+      github_access_token:
+        required: true
+
+
+##### Inputs
+
+| Name                | Requirement | Default | Description                 |
+| -----------         | ----------- | ------- | --------------------------- |
+| `version`           | _required_  |         | Version of the application  |
+| `deploy_timestamp`  | _required_  |         | Deploy timestamps (you can obtained with `date -u --rfc-3339=seconds`) |
+
+
+##### Secrets
+
+| Name                  | Requirement | Description                 |
+| --------------------- | ----------- | --------------------------- |
+| `github_access_token` | _required_  | Used to push changes to git |  
 
 
 ## Contact :mailbox_with_mail:

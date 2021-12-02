@@ -1,0 +1,44 @@
+name: Commit Changes
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+        description: Version of the application
+      deploy_timestamp:
+        required: true
+        type: string
+        description: Deploy timestamps (you can obtained with date -u --rfc-3339=seconds)
+    secrets:
+      github_access_token:
+        required: true
+
+env:
+  VERSION: ${{ inputs.version }}
+  DEPLOY: ${{ inputs.deploy_timestamp }}
+
+jobs:
+  commit-changes:
+    name: Commit Changes
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Update VERSION file
+      run: echo ${VERSION} > app/VERSION
+    - name: Update DEPLOY file
+      run: echo ${DEPLOY} > app/DEPLOY
+    - name: Add to git VERSION file
+      run: git add app/VERSION
+    - name: Add to git DEPLOY file
+      run: git add app/DEPLOY
+    - name: Commit files
+      run: |
+        git config --global user.email "dev@alicebiometrics.com"
+        git config --global user.name "Alice Biometrics"
+        git commit -m "Update version to ${VERSION}"
+    - name: Push changes
+      uses: alice-biometrics/github-push-action@master
+      with:
+        github_token: ${{ secrets.github_access_token }}

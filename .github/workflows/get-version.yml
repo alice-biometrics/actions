@@ -1,0 +1,39 @@
+name: Get Version
+
+on:
+  workflow_call:
+    inputs:
+      type:
+        required: true
+        type: string
+        description: Two options [merge, release]
+    outputs:
+      version: 
+        description: "Version obtained from git"
+        value: ${{ jobs.get-version.outputs.version }}
+
+env:
+  TYPE: ${{ inputs.type }}
+
+jobs:
+  get-version:
+    name: Get Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get latest tag
+      if: ${{ env.TYPE == 'merge' }}
+      run: |
+        git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+        echo "TAG=$(echo $(git describe --tags $(git rev-list --tags --max-count=1)))" >> $GITHUB_ENV
+    - name: Set VERSION (merge)
+      if: ${{ env.TYPE == 'merge' }}
+      run: echo "VERSION=${TAG:1}-$(echo ${GITHUB_SHA:0:8})" >> $GITHUB_ENV
+    - name: Set VERSION (release)
+      if: ${{ env.TYPE == 'release' }}
+      run: echo "VERSION=$(echo ${GITHUB_REF:11})" >> $GITHUB_ENV
+    - name: Set output
+      id: set-version
+      run: echo "::set-output name=version::$VERSION"
