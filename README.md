@@ -206,7 +206,7 @@ Example to get this output:
 get-version:
   uses: alice-biometrics/actions/.github/workflows/get-version.yml@main
   with:
-    type: merge
+    type: commit
 print-version:
     needs: get-version
     runs-on: ubuntu-latest

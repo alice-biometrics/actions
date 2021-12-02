@@ -6,7 +6,7 @@ on:
       type:
         required: true
         type: string
-        description: Two options [merge, release]
+        description: Two options [commit, release]
     outputs:
       version: 
         description: "Version obtained from git"
@@ -24,12 +24,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Get latest tag
-      if: ${{ env.TYPE == 'merge' }}
+      if: ${{ env.TYPE == 'commit' }}
       run: |
         git fetch --depth=1 origin +refs/tags/*:refs/tags/*
         echo "TAG=$(echo $(git describe --tags $(git rev-list --tags --max-count=1)))" >> $GITHUB_ENV
-    - name: Set VERSION (merge)
-      if: ${{ env.TYPE == 'merge' }}
+    - name: Set VERSION (commit)
+      if: ${{ env.TYPE == 'commit' }}
       run: echo "VERSION=${TAG:1}-$(echo ${GITHUB_SHA:0:8})" >> $GITHUB_ENV
     - name: Set VERSION (release)
       if: ${{ env.TYPE == 'release' }}
