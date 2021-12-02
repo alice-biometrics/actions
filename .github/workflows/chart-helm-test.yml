@@ -10,6 +10,10 @@ on:
         required: true
         type: string 
         default: staging
+      test_deploy:
+        required: false
+        type: boolean
+        default: false
     secrets:
       github_access_token:
         required: false
@@ -27,14 +31,18 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: alice-biometrics/alice-k8s-cloud
-          token: ${{ secrets.github_access_token}}   
+          token: ${{secrets.github_access_token}}   
 
       - name: Chart Helm Linter
         id: linter
         run: helm lint ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
 
-      - name: Create kind cluster for testing Chart
-        uses: helm/kind-action@v1.2.0
-
-      - name: Chart Helm Deploy
-        run: helm install ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
+  chart-helm-test-deploy:
+    needs: chart-helm-test
+    if: test_deploy
+    uses: alice-biometrics/actions/.github/workflows/chart-helm-test-deploy.yml@main
+    with:
+      chart: ${{inputs.chart}}
+      environment: ${{inputs.environment}}
+    secrets:
+      github_access_token: ${{secrets.github_access_token}} 
