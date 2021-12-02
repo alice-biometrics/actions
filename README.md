@@ -73,6 +73,54 @@ print-build-timestamp:
 
 ---
 
+### Helm Deploy <img src="https://github.com/alice-biometrics/custom-emojis/blob/master/images/helm-icon-color.png" width="20">
+
+This action updates, tests and deploys every changes on helm charts
+ 
+
+Example
+
+```yml
+  build:
+    uses: alice-biometrics/actions/.github/workflows/gke-docker-build.yml@main
+    with:
+      chart: my-chart
+      environment: my-environment
+      version: 1.0.0
+    secrets:
+      gke_project: ${{ secrets.MY_GKE_PROJECT }}
+      gke_key: ${{ secrets.MY_GKE_SERVICE_ACCOUNT_KEY }}
+      gke_zone: ${{ secrets.MY_GKE_ZONE }}
+      gke_cluster_prefix: ${{ secrets.MY_GKE_CLUSTER_PREFIX }}
+      github_access_token: ${{ secrets.MY_GITHUB_ACCESS_TOKEN }}
+```
+
+##### Inputs
+
+| Name           | Requirement | Default    | Description                       |
+| ---------------| ----------- | ---------- | --------------------------------- |
+| `chart`        | _required_  |            | Chart to update and then deploy.  |
+| `environment`  | _required_  |            | Environment to deploy             |
+| `version`      | _required_  | Dockerfile | Image Version to deploy           |
+| `test_deploy`  | _optional_  | false      | Test deployment chart using kind. |
+
+
+##### Outputs
+
+TODO: It will be nice return some information on failure.
+
+##### Secrets
+
+| Name              | Requirement | Description |
+| ----------------- | -----------| ----------- |
+| `gke_project`  | _required_   | ID of the Google Cloud Platform project. If provided, this will configure `gcloud` to use this project ID by default for commands. Individual commands can still override the project using the `--project` flag which takes precedence. |
+| `gke_key`   | _required_  | The service account key which will be used for authentication credentials. This key should be [created](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and stored as a [secret](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets). It can be encoded as a [Base64](https://en.wikipedia.org/wiki/Base64) string or as JSON. |
+| `gke_zone`  | _required_  | GKE region/zone |  
+| `gke_cluster_prefix`  | _required_   | How the cluster name starts (e.g `acme-gke-` ) |  
+| `github_access_token`  | _required_  | Github access token to update chart repository |  
+
+---
+
 ### Lume CI 🔥
 
 Performs continuos integrations steps using Python package `lume`. 
