@@ -27,8 +27,8 @@ jobs:
     - name: Restore Last Backup
       run: |
         echo "Backups List:"
-        gcloud sql backups list --instance=${{ github.event.inputs.gcp-cloud-sql-instance }}  --project ${{ secrets.gke_project_id  }}
+        gcloud sql backups list --instance=${{ inputs.gcp-cloud-sql-instance }}  --project ${{ secrets.gke_project_id  }}
         echo ""
         echo "Launch Restore:"
-        lastbackup=`gcloud sql backups list --instance=${{ github.event.inputs.gcp-cloud-sql-instance }} --project ${{ secrets.gke_project_id  }} | awk 'FNR == 2 {print}' | cut -d ' ' -f1`
-        gcloud sql backups restore $lastbackup --restore-instance=${{ github.event.inputs.gcp-cloud-sql-instance }} --verbosity=debug --quiet
+        lastbackup=`gcloud sql backups list --instance=${{ inputs.gcp-cloud-sql-instance }} --project ${{ secrets.gke_project_id  }} | awk 'FNR == 2 {print}' | cut -d ' ' -f1`
+        gcloud sql backups restore $lastbackup --restore-instance=${{ inputs.gcp-cloud-sql-instance }} --verbosity=debug --quiet

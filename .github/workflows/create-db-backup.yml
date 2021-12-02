@@ -27,17 +27,17 @@ jobs:
     - name: Backup Database
       run: |
         echo "Launch Backup:"
-        gcloud sql backups create --instance=${{ github.event.inputs.gcp-cloud-sql-instance }} --verbosity=debug
+        gcloud sql backups create --instance=${{ inputs.gcp-cloud-sql-instance }} --verbosity=debug
     - name: Show info about created backup
       run: |
         echo "Last backup:"
-        gcloud sql backups list --instance=${{ github.event.inputs.gcp-cloud-sql-instance }} --project ${{ secrets.gke_project_id  }} --filter="type:ON_DEMAND" | head -n 2
+        gcloud sql backups list --instance=${{ inputs.gcp-cloud-sql-instance }} --project ${{ secrets.gke_project_id  }} --filter="type:ON_DEMAND" | head -n 2
     - name: Check number of backups on demand
       id: backup
       run: | 
-        backup_list=`gcloud sql backups list --instance=${{ github.event.inputs.gcp-cloud-sql-instance }} --project ${{ secrets.gke_project_id  }} --filter="type:ON_DEMAND" | wc -l`
+        backup_list=`gcloud sql backups list --instance=${{ inputs.gcp-cloud-sql-instance }} --project ${{ secrets.gke_project_id  }} --filter="type:ON_DEMAND" | wc -l`
         echo "Number of ON_DEMAND backups:"
-        gcloud sql backups list --instance=${{ github.event.inputs.gcp-cloud-sql-instance }} --project ${{ secrets.gke_project_id  }} --filter="type:ON_DEMAND" | wc -l
+        gcloud sql backups list --instance=${{ inputs.gcp-cloud-sql-instance }} --project ${{ secrets.gke_project_id  }} --filter="type:ON_DEMAND" | wc -l
         unset RETENTION
         if [ "$backup_list" -gt "8" ] ; then
           RETENTION=true
@@ -47,5 +47,5 @@ jobs:
     - name: Check retention before delete first on demand backup of this database 
       if: steps.backup.outputs.RETENTION
       run: |
-        first_backup=`gcloud sql backups list --instance=${{ github.event.inputs.gcp-cloud-sql-instance }} --project ${{ secrets.gke_project_id }} --filter="type:ON_DEMAND" | tail -n 1 | cut -d ' ' -f1`
-        gcloud sql backups delete $first_backup --instance=${{ github.event.inputs.gcp-cloud-sql-instance }} --quiet  
+        first_backup=`gcloud sql backups list --instance=${{ inputs.gcp-cloud-sql-instance }} --project ${{ secrets.gke_project_id }} --filter="type:ON_DEMAND" | tail -n 1 | cut -d ' ' -f1`
+        gcloud sql backups delete $first_backup --instance=${{ inputs.gcp-cloud-sql-instance }} --quiet  
