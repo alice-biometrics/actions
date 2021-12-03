@@ -50,12 +50,12 @@ jobs:
         id: helm-deploy
         run: |
           gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
-          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml --wait --atomic --namespace ${{inputs.environment}}
+          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml --install --wait --atomic --namespace ${{inputs.environment}}
 
       - name: Rollback Helm Deploy
         if:  ${{ steps.helm-deploy.outcome == 'failure' }}
         run: |
-          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old --wait --atomic --namespace ${{inputs.environment}}        
+          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old --install --wait --atomic --namespace ${{inputs.environment}}        
 
       - name: Restore Reference Docker Image
         if:  ${{ steps.helm-deploy.outcome == 'failure' }}
