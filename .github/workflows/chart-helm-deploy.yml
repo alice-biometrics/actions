@@ -67,7 +67,7 @@ jobs:
           git add -u 
 
       - name: Purge old Reference Image
-        if:  ${{ steps.helm-deploy.outcome == 'success' }}
+        if:  ${{ steps.helm-deploy.outcome == 'sucess' }}
         run: |
           rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
           git config --global user.email "dev@alicebiometrics.com"
