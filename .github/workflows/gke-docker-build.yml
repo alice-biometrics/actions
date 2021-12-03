@@ -86,7 +86,15 @@ jobs:
         working-directory: ${{inputs.working_directory}}
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE})"
-          docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} --build-arg REGISTRY=${REGISTRY} .
+          if [[ ${DOCKERFILE} == *".production"* ]]; then
+            echo "Building docker image for production"
+            docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
+            --build-arg REGISTRY=${REGISTRY} \
+            --build-arg VERSION=${TAG} \
+            --build-arg BASE_IMAGE=${{ inputs.image }} .
+          else
+            docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} --build-arg REGISTRY=${REGISTRY} .
+          fi
           echo "Docker image is taged with ${IMAGE}:${TAG}"
       - name: Docker Build With GITHUB_ACCESS_TOKEN
         if:  ${{ env.GITHUB_ACCESS_TOKEN != '' && steps.check-build-status.outcome == 'failure'}}
@@ -94,9 +102,18 @@ jobs:
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE}) with GITHUB_ACCESS_TOKEN"
           echo ${{ env.GITHUB_ACCESS_TOKEN}} > secret-github-access-token.txt
-          DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
-           --build-arg REGISTRY=${REGISTRY} \
-           --secret id=github-access-token,src=secret-github-access-token.txt .
+          if [[ ${DOCKERFILE} == *".production"* ]]; then
+            echo "Building docker image for production"
+            DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
+            --build-arg REGISTRY=${REGISTRY} \
+            --build-arg VERSION=${TAG} \
+            --build-arg BASE_IMAGE=${{ inputs.image }} \
+            --secret id=github-access-token,src=secret-github-access-token.txt .
+          else
+            DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
+            --build-arg REGISTRY=${REGISTRY} \
+            --secret id=github-access-token,src=secret-github-access-token.txt .
+          fi
           echo "Docker image is taged with ${IMAGE}:${TAG}"
       - name: Check Docker 
         if:  ${{ steps.check-build-status.outcome == 'failure' }}
