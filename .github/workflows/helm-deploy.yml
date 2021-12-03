@@ -69,8 +69,6 @@ jobs:
           project_id:  ${{secrets.gke_project}}
           service_account_key: ${{ secrets.gke_key }}
           export_default_credentials: true
-      - name: Gcloud Auth
-        run: gcloud auth configure-docker
       - name: Helm Deploy
         run: |
           gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
