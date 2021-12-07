@@ -47,21 +47,35 @@ jobs:
         run: gcloud auth configure-docker
 
       - name: Helm Deploy
+        id: helm-deploy
         run: |
           gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
-          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml --dry-run --namespace ${{inputs.environment}}
+          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml --install --wait --atomic --namespace ${{inputs.environment}}
 
-      # - name: Rollback
-      #   if: failure()
-      #   run: |
-      #     kubectl -n ${NAMESPACE} rollout undo ${DEPLOYMENT}          
+      - name: Rollback Helm Deploy
+        if:  ${{ steps.helm-deploy.outcome == 'failure' }}
+        run: |
+          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old --install --wait --atomic --namespace ${{inputs.environment}}        
 
-      # - name: Chart Helm Linter
-      #   id: linter
-      #   run: helm lint ${{github.event.inputs.chart}}/chart/ -f ${{github.event.inputs.chart}}/chart/${{github.event.inputs.environment}}
+      - name: Restore Reference Docker Image
+        if:  ${{ steps.helm-deploy.outcome == 'failure' }}
+        run: |
+          cp ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
+          rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
+          git config --global user.email "dev@alicebiometrics.com"
+          git config --global user.name "Alice Biometrics"          
+          git add -u 
 
-      # - name: Create kind cluster for testing Chart
-      #   uses: helm/kind-action@v1.2.0
+      - name: Purge old Reference Image
+        if:  ${{ steps.helm-deploy.outcome == 'sucess' }}
+        run: |
+          rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
+          git config --global user.email "dev@alicebiometrics.com"
+          git config --global user.name "Alice Biometrics"          
+          git add -u
 
-      # - name: Chart Helm Deploy
-      #   run: helm install ${{github.event.inputs.chart}} ${{github.event.inputs.chart}}/chart/ -f ${{github.event.inputs.chart}}/chart/${{github.event.inputs.environment}}
+      - name: Push changes
+        uses: alice-biometrics/github-push-action@master
+        with:
+          github_token: ${{ secrets.github_access_token}} 
+          repository: alice-biometrics/alice-k8s-cloud
