@@ -29,6 +29,13 @@ on:
         required: false
         type: boolean
         default: true
+      base_image:
+        required: false
+        type: string 
+      base_version:
+        required: false
+        type: string  
+        default: latest
       timeout_minutes: 
         required: false
         type: number
@@ -37,6 +44,10 @@ on:
       build_timestamp:
         description: "Timestamp for the time just prior to build"
         value: ${{ jobs.gke-docker-build.outputs.build_timestamp }}
+      failure_info:
+        description: "Information about the failure"
+        value: ${{ jobs.gke-docker-build.outputs.failure_info }}
+
     secrets:
       gke_project:
         required: true
@@ -49,9 +60,13 @@ env:
   TAG: ${{ inputs.tag }}
   DOCKERFILE: ${{ inputs.dockerfile }}
   REGISTRY: eu.gcr.io/${{ secrets.gke_project}}
-  IMAGE: eu.gcr.io/${{ secrets.gke_project}}/${{ inputs.image }}
+  IMAGE: ${{ inputs.image }}
+  IMAGE_PATH: eu.gcr.io/${{ secrets.gke_project}}/${{ inputs.image }}
   GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token}}
-
+  BASE_IMAGE: ${{ inputs.base_image }}
+  BASE_VERSION: ${{ inputs.base_version }}
+  FAILURE_INFO: Failure on gke-docker-build.
+  
 jobs:
   gke-docker-build:
     name: GKE Docker Build
@@ -59,6 +74,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout_minutes }}
     outputs:
       build_timestamp: ${{ steps.update_version_and_deploy_files.outputs.build_timestamp }}
+      failure_info: ${{ steps.set_output_if_failure.outputs.failure_info}}
     steps:
       - uses: actions/checkout@v2
       - uses: google-github-actions/setup-gcloud@v0.2.1
@@ -71,7 +87,10 @@ jobs:
       - name: Check if docker image already exists
         id: check-build-status
         continue-on-error: true
-        run: docker manifest inspect ${IMAGE}:${TAG} > /dev/null
+        run: docker manifest inspect ${IMAGE_PATH}:${TAG} > /dev/null
+      - name: Set BASE_IMAGE if required 
+        if: env.BASE_IMAGE == null
+        run: echo "BASE_IMAGE=${IMAGE}" >> $GITHUB_ENV
       - name: Update VERSION and DEPLOY Files 
         if: ${{ inputs.update_version_and_deploy_files == true && steps.check-build-status.outcome == 'failure'}}
         id: update_version_and_deploy_files
@@ -83,53 +102,69 @@ jobs:
           echo "::set-output name=build_timestamp::${BUILD_TIMESTAMP}"
       - name: Docker Build
         if:  ${{ env.GITHUB_ACCESS_TOKEN == '' && steps.check-build-status.outcome == 'failure' }}
+        id: docker_build
         working-directory: ${{inputs.working_directory}}
         run: |
-          echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE})"
-          if [[ ${DOCKERFILE} == *".production"* ]]; then
-            echo "Building docker image for production"
-            docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
-            --build-arg REGISTRY=${REGISTRY} \
-            --build-arg VERSION=${TAG} \
-            --build-arg BASE_IMAGE=${{ inputs.image }} .
-          else
-            docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} --build-arg REGISTRY=${REGISTRY} .
-          fi
-          echo "Docker image is taged with ${IMAGE}:${TAG}"
+          echo "Building docker image ${IMAGE_PATH} (${TAG}) from Dockerfile (${DOCKERFILE})"
+          docker build -t ${IMAGE_PATH}:${TAG} -f ${PWD}/${DOCKERFILE} \
+          --build-arg REGISTRY=${REGISTRY} \
+          --build-arg BASE_IMAGE=${BASE_IMAGE} \
+          --build-arg BASE_VERSION=${BASE_VERSION} .
+          echo "Docker image is taged with ${IMAGE_PATH}:${TAG}"
       - name: Docker Build With GITHUB_ACCESS_TOKEN
         if:  ${{ env.GITHUB_ACCESS_TOKEN != '' && steps.check-build-status.outcome == 'failure'}}
+        id: docker_build_with_github_access_token
         working-directory: ${{inputs.working_directory}}
         run: |
-          echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE}) with GITHUB_ACCESS_TOKEN"
+          echo "Building docker image ${IMAGE_PATH} (${TAG}) from Dockerfile (${DOCKERFILE}) with GITHUB_ACCESS_TOKEN"
           echo ${{ env.GITHUB_ACCESS_TOKEN}} > secret-github-access-token.txt
-          if [[ ${DOCKERFILE} == *".production"* ]]; then
-            echo "Building docker image for production"
-            DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
-            --build-arg REGISTRY=${REGISTRY} \
-            --build-arg VERSION=${TAG} \
-            --build-arg BASE_IMAGE=${{ inputs.image }} \
-            --secret id=github-access-token,src=secret-github-access-token.txt .
-          else
-            DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
-            --build-arg REGISTRY=${REGISTRY} \
-            --secret id=github-access-token,src=secret-github-access-token.txt .
-          fi
-          echo "Docker image is taged with ${IMAGE}:${TAG}"
+          DOCKER_BUILDKIT=1 docker build -t ${IMAGE_PATH}:${TAG} -f ${PWD}/${DOCKERFILE} \
+          --build-arg REGISTRY=${REGISTRY} \
+          --build-arg BASE_IMAGE=${BASE_IMAGE} \
+          --build-arg BASE_VERSION=${BASE_VERSION} \
+          --secret id=github-access-token,src=secret-github-access-token.txt .
+          echo "Docker image is taged with ${IMAGE_PATH}:${TAG}"
+      - name: Failure Info [Build]
+        if:  failure() && steps.docker_build.outcome == 'failure' || steps.docker_build_with_github_access_token.outcome == 'failure'
+        run: |
+          FAILURE_INFO="Failure creating of the image ${IMAGE}:${TAG} (${DOCKERFILE})"
+          echo "FAILURE_INFO=${FAILURE_INFO}" >> $GITHUB_ENV
+          echo "FAILURE_INFO: ${FAILURE_INFO}"
       - name: Check Docker 
         if:  ${{ steps.check-build-status.outcome == 'failure' }}
+        id: check_docker
         uses: azure/container-scan@v0
         with:
-          image-name: ${{env.IMAGE}}:${{env.TAG}}
+          image-name: ${{env.IMAGE_PATH}}:${{env.TAG}}
           run-quality-checks: True
+      - name: Failure Info [Check Docker]
+        if:  failure() && steps.check_docker.outcome == 'failure'
+        run: |
+          FAILURE_INFO="Failure checking the vulnerabilities of the image ${IMAGE}:${TAG} (${DOCKERFILE})"
+          echo "FAILURE_INFO=${FAILURE_INFO}" >> $GITHUB_ENV
+          echo "FAILURE_INFO: ${FAILURE_INFO}"
       - name: Add Additional Tag 
         if: ${{ inputs.additional_tag != '' &&  steps.check-build-status.outcome == 'failure' }}
         run: |
-          docker tag ${IMAGE}:${TAG} ${IMAGE}:${{inputs.additional_tag}}
-          echo "Docker image is taged with ${IMAGE}:${{inputs.additional_tag}}"
+          docker tag ${IMAGE_PATH}:${TAG} ${IMAGE_PATH}:${{inputs.additional_tag}}
+          echo "Docker image is taged with ${IMAGE_PATH}:${{inputs.additional_tag}}"
       - name: Publish Docker
         if: ${{ inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
-        run: docker push ${IMAGE}:${TAG}
+        id: publish_docker
+        run: docker push ${IMAGE_PATH}:${TAG}
       - name: Publish Additional Tag
         if: ${{ inputs.additional_tag != '' && inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
-        run: docker push ${IMAGE}:${{inputs.additional_tag}} 
+        id: publish_docker_additional_tag
+        run: docker push ${IMAGE_PATH}:${{inputs.additional_tag}} 
+      - name: Failure Info [Publish]
+        if: failure() && steps.publish_docker.outcome == 'failure' || steps.publish_docker_additional_tag.outcome == 'failure'
+        run: |
+          FAILURE_INFO="Failure publishing the image ${IMAGE}:${TAG} (${DOCKERFILE})"
+          echo "FAILURE_INFO=${FAILURE_INFO}" >> $GITHUB_ENV
+          echo "FAILURE_INFO: ${FAILURE_INFO}"
+      - name: Set Output if failure
+        if: failure()
+        id: set_output_if_failure
+        run: echo "::set-output name=failure_info::${FAILURE_INFO}"
+
 

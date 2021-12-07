@@ -36,12 +36,15 @@ Example
 | `publish`           | _optional_  | true       | If true the workflow will publish tagged images to the registry |
 | `timeout_minutes`.  | _optional_  | 30         | Timeout to cancel the workflow |
 | `update_version_and_deploy_files` | _optional_  | true | This option update app/VERSION and app/DEPLOY files |
+| `base_image` | _optional_  | value of required field `image` | Option to construct complex Dockerfiles |
+| `base_version` | _optional_  | latest | Option to construct complex Dockerfiles |
 
 ##### Outputs
 
 | Name              | Description                                 |
 | ----------------- | --------------------------------------------| 
 | `build_timestamp` | Timestamp for the time just prior to build. Only valid if input `update_version_and_deploy_files` is true  | 
+| `failure_info`    | Information about the failure  | 
 
 Example to get this output:
 
@@ -60,7 +63,14 @@ print-build-timestamp:
     runs-on: ubuntu-latest
     steps:
       - name: Print Build Timestamp
-        run: echo "Build Timestamp: ${{ needs.build.build_timestamp }}"
+        run: echo "Build Timestamp: ${{ needs.build.outputs.build_timestamp }}"
+print-failure-info:
+    needs: build
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Failure Info
+        run: echo "Failure Info: ${{ needs.build.outputs.failure_info }}"
 ```
 
 ##### Secrets
@@ -260,7 +270,7 @@ print-version:
     runs-on: ubuntu-latest
     steps:
       - name: Print Version
-        run: echo "Version: ${{ needs.get-version.version }}"
+        run: echo "Version: ${{ needs.get-version.outputs.version }}"
 ```
 
 ---
