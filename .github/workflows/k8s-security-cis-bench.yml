@@ -40,4 +40,5 @@ jobs:
         run: kubectl logs kube-bench
 
       - name: Clean CIS Benchmark
+        if: always()
         run: kubectl delete pod kube-bench
