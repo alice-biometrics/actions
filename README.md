@@ -121,6 +121,39 @@ TODO: It will be nice return some information on failure.
 
 ---
 
+### Helm Rollback <img src="https://github.com/alice-biometrics/custom-emojis/blob/master/images/helm-icon-color.png" width="20">
+
+This action rollback helm chart backing to previous state and deploy it.
+ 
+
+Example
+
+```yml
+  build:
+    uses: alice-biometrics/actions/.github/workflows/helm-rollback.yml@main
+    with:
+      chart: my-chart
+      environment: my-environment
+    secrets:
+      github_access_token: ${{ secrets.MY_GITHUB_ACCESS_TOKEN }}
+```
+
+##### Inputs
+
+| Name           | Requirement | Default    | Description                       |
+| ---------------| ----------- | ---------- | --------------------------------- |
+| `chart`        | _required_  |            | Chart to update and then deploy.  |
+| `environment`  | _required_  |            | Environment to deploy             |
+
+
+##### Secrets
+
+| Name              | Requirement | Description |
+| ----------------- | -----------| ----------- |
+| `github_access_token`  | _required_  | Github access token to update chart repository |  
+
+---
+
 ### Lume CI 🔥
 
 Performs continuos integrations steps using Python package `lume`. 
