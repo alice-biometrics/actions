@@ -32,6 +32,10 @@ jobs:
       - name: Launch CIS Benchmark
         run: kubectl run kube-bench --image=aquasec/kube-bench:latest --command kube-bench
 
+      - name: Wait job container is creating
+        run: sleep 10s
+        shell: bash
+
       - name: Get CIS Benchmark report
         run: kubectl logs kube-bench
 
