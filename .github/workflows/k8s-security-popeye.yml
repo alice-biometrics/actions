@@ -33,6 +33,4 @@ jobs:
         run: brew install derailed/popeye/popeye
 
       - name: Launch Popeye
-        run: |
-          popeye
-          echo "Finish"
+        run:  popeye ; echo "Finish"
