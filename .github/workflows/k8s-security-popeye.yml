@@ -24,7 +24,7 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v0.2.1
         with:
-          project_id:  $${{ secrets.GKE_PROJECT_SANDBOX }} 
+          project_id:  ${{ secrets.GKE_PROJECT_SANDBOX }} 
           service_account_key: ${{ secrets.GKE_KEY_SANDBOX }}
           export_default_credentials: true
 
