@@ -6,7 +6,7 @@ on:
       environment:
         required: true
         type: string 
-        default: staging
+        default: sandbox
     secrets:
       gke_key:
         required: true
@@ -25,11 +25,11 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v0.2.1
         with:
-          project_id:  ${{ secrets.GKE_PROJECT_SANDBOX}}
-          service_account_key: ${{ secrets.GKE_KEY_SANDBOX }}
+          project_id:  $${{ secrets.gke_project}} 
+          service_account_key: ${{ secrets.gke_key }}
           export_default_credentials: true
 
-      - name: Gcloud Auth ${{ secrets.GKE_PROJECT_SANDBOX}}
+      - name: Gcloud Auth ${{ secrets.gke_project}}
         run: gcloud auth configure-docker
 
       - name: Gcloud generate Kubeconfig
