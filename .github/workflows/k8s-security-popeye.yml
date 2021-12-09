@@ -34,3 +34,7 @@ jobs:
 
       - name: Launch Popeye
         run: popeye
+
+      - name: Clean
+        if: always()
+        run: echo "Finish"
