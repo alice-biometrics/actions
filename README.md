@@ -160,9 +160,10 @@ Performs continuos integrations steps using Python package `lume`.
 This workflow will run the following steps:
   * lint 
   * check-requirements
-  * unit tests
-  * integration tests
-  * acceptance tests
+  * static-analysis
+  * test-unit
+  * test-integration
+  * test-acceptance
 
 Example
 
