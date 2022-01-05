@@ -46,6 +46,7 @@ jobs:
           echo "Updating docker image on chart ${{inputs.chart}} (environment: ${{inputs.environment}}) to ${{inputs.version}}"
           cd ${{inputs.chart}}/chart
           sed -ri 's/^(\s*)(tag:.*$)/\1tag: ${{inputs.version}}/' values-${{inputs.environment}}.yaml
+          cp values-${{inputs.environment}}.yaml values-${{inputs.environment}}.yaml.old
           git add -u
           git config --global user.email "dev@alicebiometrics.com"
           git config --global user.name "Alice Biometrics"
@@ -70,6 +71,31 @@ jobs:
           service_account_key: ${{ secrets.gke_key }}
           export_default_credentials: true
       - name: Helm Deploy
+        id: helm-deploy
         run: |
           gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
           helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml --dry-run --namespace ${{inputs.environment}}
+      - name: Rollback Helm Deploy
+        if:  ${{ steps.helm-deploy.outcome == 'failure' }}
+        run: |
+          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old --install --wait --atomic --namespace ${{inputs.environment}}        
+      - name: Restore Reference Docker Image
+        if:  ${{ steps.helm-deploy.outcome == 'failure' }}
+        run: |
+          cp ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
+          rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
+          git config --global user.email "dev@alicebiometrics.com"
+          git config --global user.name "Alice Biometrics"          
+          git add -u 
+      - name: Purge old Reference Image
+        if:  ${{ steps.helm-deploy.outcome == 'success' }}
+        run: |
+          rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
+          git config --global user.email "dev@alicebiometrics.com"
+          git config --global user.name "Alice Biometrics"          
+          git add -u
+      - name: Push changes
+        uses: alice-biometrics/github-push-action@master
+        with:
+          github_token: ${{ secrets.github_access_token}} 
+          repository: alice-biometrics/alice-k8s-cloud

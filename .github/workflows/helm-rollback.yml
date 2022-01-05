@@ -1,0 +1,49 @@
+name: Helm Rollback
+
+on:
+  workflow_call:
+    inputs:
+      chart:
+        required: true
+        type: string 
+      environment:
+        required: true
+        type: string 
+    secrets:
+      github_access_token:
+        required: false
+
+jobs:
+  helm-rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.4.0
+      - name: Checkout Helm Chart Repo
+        uses: actions/checkout@v2
+        with:
+          repository: alice-biometrics/alice-k8s-cloud
+          token: ${{ secrets.github_access_token}}   
+      - name: Rollback Helm Deploy
+        run: |
+          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old --install --wait --atomic --namespace ${{inputs.environment}}        
+      - name: Restore Reference Docker Image
+        run: |
+          cp ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
+          rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
+          git config --global user.email "dev@alicebiometrics.com"
+          git config --global user.name "Alice Biometrics"          
+          git add -u 
+      - name: Purge old Reference Image
+        run: |
+          rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
+          git config --global user.email "dev@alicebiometrics.com"
+          git config --global user.name "Alice Biometrics"          
+          git add -u
+      - name: Push changes
+        uses: alice-biometrics/github-push-action@master
+        with:
+          github_token: ${{ secrets.github_access_token}} 
+          repository: alice-biometrics/alice-k8s-cloud

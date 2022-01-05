@@ -37,6 +37,7 @@ env:
   SLACK_ICON: ${{ inputs.icon }}  
   SLACK_FOOTER: 'Repository: ${{ github.repository }}'
   SLACK_COLOR: ${{ inputs.color }}  
+  MSG_MINIMAL: actions url
 
 jobs:
   notify-slack:
@@ -54,5 +55,5 @@ jobs:
         SLACK_COLOR: ${{ env.SLACK_COLOR }}
         SLACK_ICON: ${{ env.SLACK_ICON }}
         SLACK_WEBHOOK: ${{ secrets.slack_token }}
-        MSG_MINIMAL: true
+        MSG_MINIMAL: ${{ env.MSG_MINIMAL }}
         SLACK_FOOTER: ${{ env.SLACK_FOOTER }}
