@@ -57,21 +57,28 @@ jobs:
     name: GKE Docker Build
     runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout_minutes }}
+    
     outputs:
       build_timestamp: ${{ steps.update_version_and_deploy_files.outputs.build_timestamp }}
+      
     steps:
+
       - uses: actions/checkout@v2
+
       - uses: google-github-actions/setup-gcloud@v0.2.1
         with:
           project_id:  ${{ secrets.gke_project }}
           service_account_key: ${{ secrets.gke_key }}
           export_default_credentials: true
+
       - name: Gcloud Auth
         run: gcloud auth configure-docker
+
       - name: Check if docker image already exists
         id: check-build-status
         continue-on-error: true
         run: docker manifest inspect ${IMAGE}:${TAG} > /dev/null
+
       - name: Update VERSION and DEPLOY Files 
         if: ${{ inputs.update_version_and_deploy_files == true && steps.check-build-status.outcome == 'failure'}}
         id: update_version_and_deploy_files
@@ -81,13 +88,15 @@ jobs:
           echo ${TAG} > app/VERSION
           echo ${BUILD_TIMESTAMP} > app/DEPLOY
           echo "::set-output name=build_timestamp::${BUILD_TIMESTAMP}"
+
       - name: Docker Build
         if:  ${{ env.GITHUB_ACCESS_TOKEN == '' && steps.check-build-status.outcome == 'failure' }}
         working-directory: ${{inputs.working_directory}}
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE})"
-          docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} --build-arg REGISTRY=${REGISTRY} .
-          echo "Docker image is taged with ${IMAGE}:${TAG}"
+          DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} --build-arg REGISTRY=${REGISTRY} .
+          echo "Docker image is tagged with ${IMAGE}:${TAG}"
+
       - name: Docker Build With GITHUB_ACCESS_TOKEN
         if:  ${{ env.GITHUB_ACCESS_TOKEN != '' && steps.check-build-status.outcome == 'failure'}}
         working-directory: ${{inputs.working_directory}}
@@ -95,24 +104,27 @@ jobs:
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE}) with GITHUB_ACCESS_TOKEN"
           echo ${{ env.GITHUB_ACCESS_TOKEN}} > secret-github-access-token.txt
           DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
-           --build-arg REGISTRY=${REGISTRY} \
-           --secret id=github-access-token,src=secret-github-access-token.txt .
-          echo "Docker image is taged with ${IMAGE}:${TAG}"
-      - name: Check Docker 
-        if:  ${{ steps.check-build-status.outcome == 'failure' }}
-        uses: azure/container-scan@v0
-        with:
-          image-name: ${{env.IMAGE}}:${{env.TAG}}
-          run-quality-checks: True
+          --build-arg REGISTRY=${REGISTRY} \
+          --secret id=github-access-token,src=secret-github-access-token.txt .
+          echo "Docker image is tagged with ${IMAGE}:${TAG}"
+
+      # - name: Check Docker 
+      #   if:  ${{ steps.check-build-status.outcome == 'failure' }}
+      #   uses: azure/container-scan@v0
+      #   with:
+      #     image-name: ${{env.IMAGE}}:${{env.TAG}}
+      #     run-quality-checks: True
+
       - name: Add Additional Tag 
         if: ${{ inputs.additional_tag != '' &&  steps.check-build-status.outcome == 'failure' }}
         run: |
           docker tag ${IMAGE}:${TAG} ${IMAGE}:${{inputs.additional_tag}}
-          echo "Docker image is taged with ${IMAGE}:${{inputs.additional_tag}}"
+          echo "Docker image is tagged with ${IMAGE}:${{inputs.additional_tag}}"
+
       - name: Publish Docker
         if: ${{ inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
         run: docker push ${IMAGE}:${TAG}
+
       - name: Publish Additional Tag
         if: ${{ inputs.additional_tag != '' && inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
-        run: docker push ${IMAGE}:${{inputs.additional_tag}} 
-
+        run: docker push ${IMAGE}:${{inputs.additional_tag}}
