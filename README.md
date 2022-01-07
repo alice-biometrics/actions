@@ -217,7 +217,7 @@ If you want to change or fix a lume version and also execute additional lume com
     with:
       language: python
       lume_version: 0.5.2
-      additional_commands=my-additional-command-1,my-additional-command-2 # should be available on lume.yml otherwise those won't be executed
+      additional_commands: my-additional-command-1,my-additional-command-2 # should be available on lume.yml otherwise those won't be executed
 ```
 
 
