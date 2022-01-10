@@ -8,8 +8,7 @@ Reusable Github Action to help on daily development!
 
 This action builds an image, checks its vulnerabilities and then publish to a GKE registry. If the image is already published, the workflow will skip unnecessary steps.
 
-Example
-
+*Example:*
 ```yml
   build:
     uses: alice-biometrics/actions/.github/workflows/gke-docker-build.yml@main
@@ -34,7 +33,7 @@ Example
 | `working_directory` | _optional_  | .          | Working directory where the docker build will be executed       |
 | `additional_tag`    | _optional_  | latest     | Additional Tag to versioning the docker image                   |
 | `publish`           | _optional_  | true       | If true the workflow will publish tagged images to the registry |
-| `timeout_minutes`.  | _optional_  | 30         | Timeout to cancel the workflow |
+| `timeout_minutes`   | _optional_  | 30         | Timeout to cancel the workflow |
 | `update_version_and_deploy_files` | _optional_  | true | This option update app/VERSION and app/DEPLOY files |
 
 ##### Outputs
@@ -77,9 +76,7 @@ print-build-timestamp:
 
 This action updates, tests and deploys every changes on helm charts
  
-
-Example
-
+*Example:*
 ```yml
   build:
     uses: alice-biometrics/actions/.github/workflows/gke-docker-build.yml@main
@@ -125,9 +122,7 @@ TODO: It will be nice return some information on failure.
 
 This action rollback helm chart backing to previous state and deploy it.
  
-
-Example
-
+*Example:*
 ```yml
   build:
     uses: alice-biometrics/actions/.github/workflows/helm-rollback.yml@main
@@ -165,8 +160,7 @@ This workflow will run the following steps:
   * test-integration
   * test-acceptance
 
-Example
-
+*Example:*
 ```yml
   ci:
     uses: alice-biometrics/actions/.github/workflows/lume-ci.yml@main
@@ -176,11 +170,12 @@ Example
 
 ##### Inputs
 
-| Name                    | Requirement | Default    | Description                                                     |
-| ----------------------- | ----------- | ---------- | --------------------------------------------------------------- |
-| `language`              | _required_  |            | Select the language (Use python or node)                        |
-| `lume_config_filename`  | _optional_  | lume.yml | In case you want to change the name of the lume configuration file or just store in another folder |
-
+| Name                   | Requirement | Default | Description                                                                                                                     |
+|------------------------| ----------- |------|---------------------------------------------------------------------------------------------------------------------------------|
+| `language`             | _required_  |      | Select the language (Use python or node)                                                                                        |
+| `lume_version`         | _optional_  | latest | Select the lume version if required. Check the [release history](https://pypi.org/project/lume/#history)                        |
+| `lume_config_filename` | _optional_  | lume.yml | In case you want to change the name of the lume configuration file or just store in another folder                              |
+| `additional_commands` | _optional_  |  | Set additional lume commands to be executed at the end of the required ones. Use commas if you need to execute several commands |
 
 ##### Secrets
 
@@ -215,6 +210,17 @@ steps:
     run: echo "test-acceptance"
 ```
 
+If you want to change or fix a lume version and also execute additional lume commands, you can do it with the following code:
+```yml
+  ci:
+    uses: alice-biometrics/actions/.github/workflows/lume-ci.yml@main
+    with:
+      language: python
+      lume_version: 0.5.2
+      additional_commands: my-additional-command-1,my-additional-command-2 # should be available on lume.yml otherwise those won't be executed
+```
+
+
 ---
 
 ### Notify Slack 💬
@@ -222,8 +228,7 @@ steps:
 This action sends a slack notification to a selected channel.
 This actions is a wrapper of the [slack-notify action](https://github.com/marketplace/actions/slack-notify).
 
-Example
-
+*Example:*
 ```yml
   build:
     uses: alice-biometrics/actions/.github/workflows/notify-slack.yml@main
@@ -260,8 +265,7 @@ Example
 
 This action obtains the version from tags, commits and releases.
 
-Example
-
+*Example:*
 ```yml
   get-version:
     uses: alice-biometrics/actions/.github/workflows/get-version.yml@main
@@ -303,8 +307,7 @@ print-version:
 
 This action modify two files (VERSION, DEPLOY) and push changes to the repository.
 
-Example
-
+*Example:*
 ```yml
   commit-changes:
     uses: alice-biometrics/actions/.github/workflows/commit-changes.yml@main

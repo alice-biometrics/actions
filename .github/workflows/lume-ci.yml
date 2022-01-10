@@ -8,10 +8,18 @@ on:
         type: string
         default: python
         description: Select the language (Use python or node)
+      lume_version:
+        required: false
+        type: string
+        default: latest
       lume_config_filename: 
         required: false
         type: string
         default: lume.yml
+      additional_commands:
+        required: false
+        type: string
+        default: ""
     secrets:
       github_access_token:
         required: false
@@ -25,13 +33,13 @@ jobs:
     name: Lume CI
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    steps: 
+    steps:
       - uses: actions/checkout@v2
       - name: Setup Python
         if: ${{ inputs.language == 'python' }}
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
       - uses: actions/cache@v2
         if: ${{ inputs.language == 'python' }}
         with:
@@ -57,10 +65,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: Lume
-        run: pip install lume 
+        run: |
+          version=${{ inputs.lume_version}}
+          if [ "$version" = "latest" ]; then
+              pip install -U lume
+          else
+              pip install -U lume==$version
+          fi
       - name: Install
-        run: lume -install 
-      - name: Check Requirements 
+        run: lume -install
+      - name: Check Requirements
         run: lume -check-requirements
       - name: Static Analysis
         run: lume -static-analysis
@@ -72,3 +86,7 @@ jobs:
         run: lume -test-integration
       - name: Acceptance Tests
         run: lume -test-acceptance
+      - name: Additional Commands
+        run: |
+           additional_commands=(`echo ${{ inputs.additional_commands}} | sed 's/,/\n/g'`)
+           for command in ${additional_commands[@]}; do lume -$command; done
