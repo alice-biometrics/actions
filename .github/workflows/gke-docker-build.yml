@@ -49,7 +49,7 @@ env:
   TAG: ${{ inputs.tag }}
   DOCKERFILE: ${{ inputs.dockerfile }}
   REGISTRY: eu.gcr.io/${{ secrets.gke_project}}
-  IMAGE: eu.gcr.io/${{ secrets.gke_project}}/${{ inputs.image }}
+  IMAGE: ${{ inputs.image }}
   GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token}}
 
 jobs:
