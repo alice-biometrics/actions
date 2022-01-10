@@ -127,7 +127,7 @@ jobs:
 
       - name: Publish Docker
         if: ${{ inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
-        run: docker push ${IMAGE}:${TAG}
+        run: docker push ${REGISTRY}/${IMAGE}:${TAG}
 
       - name: Publish Additional Tag
         if: ${{ inputs.additional_tag != '' && inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
