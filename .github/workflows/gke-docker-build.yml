@@ -49,7 +49,7 @@ env:
   TAG: ${{ inputs.tag }}
   DOCKERFILE: ${{ inputs.dockerfile }}
   REGISTRY: eu.gcr.io/${{ secrets.gke_project}}
-  IMAGE: ${{ inputs.image }}
+  IMAGE: eu.gcr.io/${{ secrets.gke_project}}/${{ inputs.image }}
   GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token}}
 
 jobs:
@@ -122,12 +122,12 @@ jobs:
       - name: Add Additional Tag 
         if: ${{ inputs.additional_tag != '' &&  steps.check-build-status.outcome == 'failure' }}
         run: |
-          docker tag ${REGISTRY}/${IMAGE}:${TAG} ${REGISTRY}/${IMAGE}:${{inputs.additional_tag}}
-          echo "Docker image is tagged with ${REGISTRY}/${IMAGE}:${{inputs.additional_tag}}"
+          docker tag ${IMAGE}:${TAG} ${IMAGE}:${{inputs.additional_tag}}
+          echo "Docker image is tagged with ${IMAGE}:${{inputs.additional_tag}}"
 
       - name: Publish Docker
         if: ${{ inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
-        run: docker push ${REGISTRY}/${IMAGE}:${TAG}
+        run: docker push ${IMAGE}:${TAG}
 
       - name: Publish Additional Tag
         if: ${{ inputs.additional_tag != '' && inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
