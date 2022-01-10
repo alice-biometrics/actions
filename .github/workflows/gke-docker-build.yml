@@ -122,8 +122,8 @@ jobs:
       - name: Add Additional Tag 
         if: ${{ inputs.additional_tag != '' &&  steps.check-build-status.outcome == 'failure' }}
         run: |
-          docker tag ${IMAGE}:${TAG} ${IMAGE}:${{inputs.additional_tag}}
-          echo "Docker image is tagged with ${IMAGE}:${{inputs.additional_tag}}"
+          docker tag ${REGISTRY}/${IMAGE}:${TAG} ${REGISTRY}/${IMAGE}:${{inputs.additional_tag}}
+          echo "Docker image is tagged with ${REGISTRY}/${IMAGE}:${{inputs.additional_tag}}"
 
       - name: Publish Docker
         if: ${{ inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
