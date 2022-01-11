@@ -33,7 +33,7 @@ This action builds an image, checks its vulnerabilities and then publish to a GK
 | `working_directory` | _optional_  | .          | Working directory where the docker build will be executed       |
 | `additional_tag`    | _optional_  | latest     | Additional Tag to versioning the docker image                   |
 | `publish`           | _optional_  | true       | If true the workflow will publish tagged images to the registry |
-| `timeout_minutes`.  | _optional_  | 30         | Timeout to cancel the workflow |
+| `timeout_minutes`   | _optional_  | 30         | Timeout to cancel the workflow |
 | `update_version_and_deploy_files` | _optional_  | true | This option update app/VERSION and app/DEPLOY files |
 
 ##### Outputs
@@ -217,7 +217,7 @@ If you want to change or fix a lume version and also execute additional lume com
     with:
       language: python
       lume_version: 0.5.2
-      additional_commands=my-additional-command-1,my-additional-command-2 # should be available on lume.yml otherwise those won't be executed
+      additional_commands: my-additional-command-1,my-additional-command-2 # should be available on lume.yml otherwise those won't be executed
 ```
 
 

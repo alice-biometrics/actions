@@ -94,7 +94,11 @@ jobs:
         working-directory: ${{inputs.working_directory}}
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE})"
-          DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} --build-arg REGISTRY=${REGISTRY} .
+          DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
+          --build-arg REGISTRY=${REGISTRY} \
+          --build-arg TAG=${TAG} \
+          --build-arg BUILD_TIMESTAMP=${BUILD_TIMESTAMP} \
+          --build-arg IMAGE=${IMAGE} .
           echo "Docker image is tagged with ${IMAGE}:${TAG}"
 
       - name: Docker Build With GITHUB_ACCESS_TOKEN
@@ -105,6 +109,9 @@ jobs:
           echo ${{ env.GITHUB_ACCESS_TOKEN}} > secret-github-access-token.txt
           DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
           --build-arg REGISTRY=${REGISTRY} \
+          --build-arg TAG=${TAG} \
+          --build-arg BUILD_TIMESTAMP=${BUILD_TIMESTAMP} \
+          --build-arg IMAGE=${IMAGE} \
           --secret id=github-access-token,src=secret-github-access-token.txt .
           echo "Docker image is tagged with ${IMAGE}:${TAG}"
 
