@@ -17,7 +17,7 @@ on:
 
 env:
   VERSION: ${{ inputs.version }}
-  DEPLOY: ${{ inputs.deploy_timestamp }}
+  DEPLOY_TIMESTAMP: ${{ inputs.deploy_timestamp }}
 
 jobs:
   commit-changes:
@@ -26,9 +26,21 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Update VERSION file
-      run: echo ${VERSION} > app/VERSION
+      run: |
+        if [ "$VERSION" != "" ]; then
+          echo ${VERSION} > app/VERSION
+        else
+          echo "Input version cannot be empty"
+          exit 1
+        fi
     - name: Update DEPLOY file
-      run: echo ${DEPLOY} > app/DEPLOY
+      run: |
+        if [ "$DEPLOY_TIMESTAMP" != "" ]; then
+          echo ${DEPLOY_TIMESTAMP} > app/DEPLOY
+        else
+          echo "Input deploy_timestamp cannot be empty"
+          exit 1
+        fi
     - name: Add to git VERSION file
       run: git add app/VERSION
     - name: Add to git DEPLOY file
