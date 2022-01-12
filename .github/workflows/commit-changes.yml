@@ -30,7 +30,7 @@ jobs:
         if [ "$VERSION" != "" ]; then
           echo ${VERSION} > app/VERSION
         else
-          echo "Input version cannot be empty"
+          echo "::error ::Input version cannot be empty"
           exit 1
         fi
     - name: Update DEPLOY file
@@ -38,7 +38,7 @@ jobs:
         if [ "$DEPLOY_TIMESTAMP" != "" ]; then
           echo ${DEPLOY_TIMESTAMP} > app/DEPLOY
         else
-          echo "Warning Input deploy_timestamp is empty"
+          echo "::warning ::Input deploy_timestamp is empty"
         fi
     - name: Add to git VERSION file
       run: git add app/VERSION
