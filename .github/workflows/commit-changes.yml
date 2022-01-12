@@ -38,8 +38,7 @@ jobs:
         if [ "$DEPLOY_TIMESTAMP" != "" ]; then
           echo ${DEPLOY_TIMESTAMP} > app/DEPLOY
         else
-          echo "Input deploy_timestamp cannot be empty"
-          exit 1
+          echo "Warning Input deploy_timestamp is empty"
         fi
     - name: Add to git VERSION file
       run: git add app/VERSION
