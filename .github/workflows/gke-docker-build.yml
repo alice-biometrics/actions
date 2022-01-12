@@ -117,12 +117,12 @@ jobs:
           --secret id=github-access-token,src=secret-github-access-token.txt .
           echo "Docker image is tagged with ${IMAGE}:${TAG}"
 
-      # - name: Check Docker 
-      #   if:  ${{ steps.check-build-status.outcome == 'failure' }}
-      #   uses: azure/container-scan@v0
-      #   with:
-      #     image-name: ${{env.IMAGE}}:${{env.TAG}}
-      #     run-quality-checks: True
+      - name: Check Docker 
+        if:  ${{ steps.check-build-status.outcome == 'failure' }}
+        uses: azure/container-scan@v0
+        with:
+          image-name: ${{env.IMAGE}}:${{env.TAG}}
+          run-quality-checks: True
 
       - name: Add Additional Tag 
         if: ${{ inputs.additional_tag != '' &&  steps.check-build-status.outcome == 'failure' }}
