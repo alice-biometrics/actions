@@ -79,14 +79,16 @@ jobs:
         continue-on-error: true
         run: docker manifest inspect ${IMAGE}:${TAG} > /dev/null
 
-      - name: Update VERSION and DEPLOY Files 
+      - name: Update VERSION and DEPLOY Files (if the app folder exists)
         if: ${{ inputs.update_version_and_deploy_files == true && steps.check-build-status.outcome == 'failure'}}
         id: update_version_and_deploy_files
         working-directory: ${{inputs.working_directory}}
         run: |
           BUILD_TIMESTAMP=$(date -u --rfc-3339=seconds)
-          echo ${TAG} > app/VERSION
-          echo ${BUILD_TIMESTAMP} > app/DEPLOY
+          if [ -d "app" ]; then
+             echo ${TAG} > app/VERSION
+             echo ${BUILD_TIMESTAMP} > app/DEPLOY
+          fi
           echo "::set-output name=build_timestamp::${BUILD_TIMESTAMP}"
 
       - name: Docker Build
