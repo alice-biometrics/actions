@@ -25,16 +25,17 @@ This action builds an image, checks its vulnerabilities and then publish to a GK
 
 ##### Inputs
 
-| Name                | Requirement | Default    | Description                                                     |
-| ------------------- | ----------- | ---------- | --------------------------------------------------------------- |
-| `image`             | _required_  |            | Docker Image Name                                               |
-| `tag`               | _required_  |            | Tag or Version of the Docker Image                              |
-| `dockerfile`        | _optional_  | Dockerfile | Dockerfile name                                                 |
-| `working_directory` | _optional_  | .          | Working directory where the docker build will be executed       |
-| `additional_tag`    | _optional_  | latest     | Additional Tag to versioning the docker image                   |
-| `publish`           | _optional_  | true       | If true the workflow will publish tagged images to the registry |
-| `timeout_minutes`   | _optional_  | 30         | Timeout to cancel the workflow |
-| `update_version_and_deploy_files` | _optional_  | true | This option update app/VERSION and app/DEPLOY files |
+| Name                              | Requirement | Default    | Description                                                    |
+|-----------------------------------| ----------- | ---------- |----------------------------------------------------------------|
+| `image`                           | _required_  |            | Docker Image Name                                              |
+| `tag`                             | _required_  |            | Tag or Version of the Docker Image                             |
+| `dockerfile`                      | _optional_  | Dockerfile | Dockerfile name                                                |
+| `working_directory`               | _optional_  | .          | Working directory where the docker build will be executed      |
+| `additional_tag`                  | _optional_  | latest     | Additional Tag to versioning the docker image                  |
+| `publish`                         | _optional_  | true       | If true the workflow will publish tagged images to the registry |
+| `update_version_and_deploy_files` | _optional_  | true | This option update app/VERSION and app/DEPLOY files            |
+| `timeout_minutes`                 | _optional_  | 30         | Timeout to cancel the workflow                                 |
+| `scan`                            | _optional_  | true | If true the workflow will scan built image                     |
 
 ##### Outputs
 

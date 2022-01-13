@@ -33,6 +33,10 @@ on:
         required: false
         type: number
         default: 30
+      scan:
+        required: false
+        type: boolean
+        default: true
     outputs:
       build_timestamp:
         description: "Timestamp for the time just prior to build"
@@ -117,8 +121,8 @@ jobs:
           --secret id=github-access-token,src=secret-github-access-token.txt .
           echo "Docker image is tagged with ${IMAGE}:${TAG}"
 
-      - name: Check Docker 
-        if:  ${{ steps.check-build-status.outcome == 'failure' }}
+      - name: Scan Docker
+        if:  ${{ inputs.scan == true && steps.check-build-status.outcome == 'failure' }}
         uses: azure/container-scan@v0
         with:
           image-name: ${{env.IMAGE}}:${{env.TAG}}
