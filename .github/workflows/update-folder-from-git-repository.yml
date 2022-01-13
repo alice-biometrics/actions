@@ -32,7 +32,7 @@ jobs:
       - name: Update ${{ inputs.folder }}
         run: |
           git clone https://${{ secrets.github_access_token }}@${{ inputs.git_repository }} tmp
-          cp tmp/* ${{ inputs.folder }}
+          cp tmp/* ${{ inputs.folder }}/
           rm -rf tmp
           if [[ -z "$(git status --porcelain)" ]];
           then
@@ -41,7 +41,7 @@ jobs:
             git add ${{ inputs.folder }}
             git config --global user.email "dev@alicebiometrics.com"
             git config --global user.name "Alice Biometrics"
-             git commit -m "${{ inputs.commit_message }}"
+            git commit -m "${{ inputs.commit_message }}"
             echo "::warning ::${{ inputs.folder }} will be updated"
           fi
       - name: Push changes
