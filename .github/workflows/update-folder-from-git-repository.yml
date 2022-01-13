@@ -1,0 +1,51 @@
+name: Update Folder from Git Repository
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        type: string
+        description: Name of the executed job
+      git_repository:
+        required: true
+        type: string
+        description: Git Repository (format -> github.com/<organization>/<my-repo>.git)
+      folder:
+        required: true
+        type: string
+        description: Folder where repository will be downloaded
+      commit_message:
+        required: true
+        type: string
+        description: Message to commit changes if needed
+    secrets:
+      github_access_token:
+        required: true
+
+jobs:
+  update-folder-from-git-repository:
+    name: ${{ inputs.name }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Update ${{ inputs.folder }}
+        run: |
+          git clone https://${{ secrets.github_access_token }}@${{ inputs.git_repository }} tmp
+          cp tmp/* ${{ inputs.folder }}
+          rm -rf tmp
+          if [[ -z "$(git status --porcelain)" ]];
+          then
+            echo "::notice ::${{ inputs.folder }} will not be update"
+          else
+            git add ${{ inputs.folder }}
+            git config --global user.email "dev@alicebiometrics.com"
+            git config --global user.name "Alice Biometrics"
+             git commit -m "${{ inputs.commit_message }}"
+            echo "::warning ::${{ inputs.folder }} will be updated"
+          fi
+      - name: Push changes
+        uses: alice-biometrics/github-push-action@master
+        with:
+          github_token: ${{ secrets.github_access_token }}
+          force: true
