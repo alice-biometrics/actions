@@ -347,7 +347,7 @@ This action downloads a repository and copy its contain to a defined folder.
       name: My Workflow Name
       git_repository: github.com/<organization>/<my-repo>.git
       folder: my-folder
-      commit-message: Update my-folder
+      commit_message: Update my-folder
     secrets:
       github_access_token: ${{ secrets.MY_GITHUB_ACCESS_TOKEN }}
 ```
