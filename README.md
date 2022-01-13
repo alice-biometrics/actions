@@ -354,12 +354,12 @@ This action downloads a repository and copy its contain to a defined folder.
 
 ##### Inputs
 
-| Name                | Requirement  | Description                                                          |
-| -----------         |--------------|----------------------------------------------------------------------|
-| `name`           | _required_   | Name of the executed job                                             |
+| Name              | Requirement  | Description                                                          |
+| ----------------- |--------------|----------------------------------------------------------------------|
+| `name`            | _required_   | Name of the executed job                                             |
 | `git_repository`  | _required_   | Git Repository (format -> github.com/alice-biometrics/<my-repo>.git) |
-| `git_repository`  | _required_   | Folder where repository will be downloaded                           |
-| `git_repository`  | _required_   | Message to commit changes if needed                                  |
+| `folder`          | _required_   | Folder where repository will be downloaded                           |
+| `commit_message`  | _required_   | Message to commit changes if needed                                  |
 
 
 ##### Secrets
