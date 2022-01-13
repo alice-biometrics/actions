@@ -32,6 +32,7 @@ jobs:
       - name: Update ${{ inputs.folder }}
         run: |
           git clone https://${{ secrets.github_access_token }}@${{ inputs.git_repository }} tmp
+          mkdir -p ${{ inputs.folder }}
           cp tmp/* ${{ inputs.folder }}/
           rm -rf tmp
           if [[ -z "$(git status --porcelain)" ]];
