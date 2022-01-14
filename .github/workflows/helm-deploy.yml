@@ -24,6 +24,7 @@ on:
         required: false
         type: string
         description: Add some args to helm deploy command (e.g use `--dry-run` to test your workflow)
+        default: ""
     secrets:
       github_access_token:
         required: false

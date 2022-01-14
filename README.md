@@ -112,13 +112,13 @@ This action updates, tests and deploys every changes on helm charts
 
 ##### Inputs
 
-| Name           | Requirement | Default    | Description                                                                      |
-| ---------------| ----------- | ---------- |----------------------------------------------------------------------------------|
-| `chart`        | _required_  |            | Chart to update and then deploy.                                                 |
-| `environment`  | _required_  |            | Environment to deploy                                                            |
+| Name           | Requirement | Default  | Description                                                                      |
+| ---------------| ----------- | -------- |----------------------------------------------------------------------------------|
+| `chart`        | _required_  |          | Chart to update and then deploy.                                                 |
+| `environment`  | _required_  |          | Environment to deploy                                                            |
 | `version`      | _required_  | Dockerfile | Image Version to deploy                                                          |
-| `test_deploy`  | _optional_  | false      | Test deployment chart using kind.                                                |
-| `helm_deploy_args`  | _optional_  | false      | Add some args to helm deploy command (e.g use `--dry-run` to test your workflow) |
+| `test_deploy`  | _optional_  | false    | Test deployment chart using kind.                                                |
+| `helm_deploy_args`  | _optional_  | ''      | Add some args to helm deploy command (e.g use `--dry-run` to test your workflow) |
 
 
 ##### Outputs
