@@ -5,17 +5,25 @@ on:
     inputs:
       chart:
         required: true
-        type: string 
+        type: string
+        description: Chart to update and then deploy.
       environment:
         required: true
-        type: string 
+        type: string
+        description: Environment to deploy
       version:
         required: true
         type: string
+        description: Image Version to deploy
       test_deploy:
         required: false
         type: boolean
         default: false
+        description:  Test deployment chart using kind.
+      helm_deploy_args:
+        required: false
+        type: string
+        description: Add some args to helm deploy command (e.g use `--dry-run` to test your workflow)
     secrets:
       github_access_token:
         required: false
@@ -74,7 +82,7 @@ jobs:
         id: helm-deploy
         run: |
           gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
-          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml --dry-run --namespace ${{inputs.environment}}
+          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml ${{secrets.helm_deploy_args}} --namespace ${{inputs.environment}}
       - name: Rollback Helm Deploy
         if:  ${{ steps.helm-deploy.outcome == 'failure' }}
         run: |

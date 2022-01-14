@@ -31,12 +31,12 @@ on:
         default: true
       timeout_minutes: 
         required: false
-        type: number
+        type: string
         default: 30
-      scan:
+      skip_scan:
         required: false
         type: boolean
-        default: true
+        default: false
     outputs:
       build_timestamp:
         description: "Timestamp for the time just prior to build"
@@ -122,7 +122,7 @@ jobs:
           echo "Docker image is tagged with ${IMAGE}:${TAG}"
 
       - name: Scan Docker
-        if:  ${{ inputs.scan == true && steps.check-build-status.outcome == 'failure' }}
+        if:  ${{ inputs.skip_scan == false && steps.check-build-status.outcome == 'failure' }}
         uses: azure/container-scan@v0
         with:
           image-name: ${{env.IMAGE}}:${{env.TAG}}

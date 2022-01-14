@@ -25,17 +25,17 @@ This action builds an image, checks its vulnerabilities and then publish to a GK
 
 ##### Inputs
 
-| Name                              | Requirement | Default    | Description                                                    |
-|-----------------------------------| ----------- | ---------- |----------------------------------------------------------------|
-| `image`                           | _required_  |            | Docker Image Name                                              |
-| `tag`                             | _required_  |            | Tag or Version of the Docker Image                             |
-| `dockerfile`                      | _optional_  | Dockerfile | Dockerfile name                                                |
-| `working_directory`               | _optional_  | .          | Working directory where the docker build will be executed      |
-| `additional_tag`                  | _optional_  | latest     | Additional Tag to versioning the docker image                  |
+| Name                              | Requirement | Default    | Description                                                 |
+|-----------------------------------| ----------- |------------|-------------------------------------------------------------|
+| `image`                           | _required_  |            | Docker Image Name                                           |
+| `tag`                             | _required_  |            | Tag or Version of the Docker Image                          |
+| `dockerfile`                      | _optional_  | Dockerfile | Dockerfile name                                             |
+| `working_directory`               | _optional_  | .          | Working directory where the docker build will be executed   |
+| `additional_tag`                  | _optional_  | latest     | Additional Tag to versioning the docker image               |
 | `publish`                         | _optional_  | true       | If true the workflow will publish tagged images to the registry |
-| `update_version_and_deploy_files` | _optional_  | true | This option update app/VERSION and app/DEPLOY files            |
-| `timeout_minutes`                 | _optional_  | 30         | Timeout to cancel the workflow                                 |
-| `scan`                            | _optional_  | true | If true the workflow will scan built image                     |
+| `update_version_and_deploy_files` | _optional_  | true       | This option update app/VERSION and app/DEPLOY files         |
+| `timeout_minutes`                 | _optional_  | 30         | Timeout to cancel the workflow                              |
+| `skip_scan`                       | _optional_  | false      | Allows to skip the scanning of built image |
 
 ##### Outputs
 
@@ -80,7 +80,7 @@ This action updates, tests and deploys every changes on helm charts
 *Example:*
 ```yml
   build:
-    uses: alice-biometrics/actions/.github/workflows/gke-docker-build.yml@main
+    uses: alice-biometrics/actions/.github/workflows/helm-deploy.yml@main
     with:
       chart: my-chart
       environment: my-environment
@@ -93,14 +93,32 @@ This action updates, tests and deploys every changes on helm charts
       github_access_token: ${{ secrets.MY_GITHUB_ACCESS_TOKEN }}
 ```
 
+ chart:
+        required: true
+        type: string 
+      environment:
+        required: true
+        type: string 
+      version:
+        required: true
+        type: string
+      test_deploy:
+        required: false
+        type: boolean
+        default: false
+      helm_deploy_args:
+        required: false
+        type: string
+
 ##### Inputs
 
-| Name           | Requirement | Default    | Description                       |
-| ---------------| ----------- | ---------- | --------------------------------- |
-| `chart`        | _required_  |            | Chart to update and then deploy.  |
-| `environment`  | _required_  |            | Environment to deploy             |
-| `version`      | _required_  | Dockerfile | Image Version to deploy           |
-| `test_deploy`  | _optional_  | false      | Test deployment chart using kind. |
+| Name           | Requirement | Default    | Description                                                                      |
+| ---------------| ----------- | ---------- |----------------------------------------------------------------------------------|
+| `chart`        | _required_  |            | Chart to update and then deploy.                                                 |
+| `environment`  | _required_  |            | Environment to deploy                                                            |
+| `version`      | _required_  | Dockerfile | Image Version to deploy                                                          |
+| `test_deploy`  | _optional_  | false      | Test deployment chart using kind.                                                |
+| `helm_deploy_args`  | _optional_  | false      | Add some args to helm deploy command (e.g use `--dry-run` to test your workflow) |
 
 
 ##### Outputs
