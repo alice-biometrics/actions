@@ -16,7 +16,7 @@ on:
         required: false
         type: string
         default: good
-        description: "Some options [good, danger, #808080]" # '#ff0000' # red
+        description: "Some options [good, danger, #808080]"
       icon:
         required: false
         type: string

@@ -43,7 +43,7 @@ jobs:
             git config --global user.email "dev@alicebiometrics.com"
             git config --global user.name "Alice Biometrics"
             git commit -m "${{ inputs.commit_message }}"
-            echo "::warning ::${{ inputs.folder }} will be updated"
+            echo "::notice ::${{ inputs.folder }} will be updated"
           fi
       - name: Push changes
         uses: alice-biometrics/github-push-action@master

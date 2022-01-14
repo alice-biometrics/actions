@@ -119,7 +119,7 @@ jobs:
           --build-arg BUILD_TIMESTAMP=${BUILD_TIMESTAMP} \
           --build-arg IMAGE=${IMAGE} \
           --secret id=github-access-token,src=secret-github-access-token.txt .
-          echo "Docker image is tagged with ${IMAGE}:${TAG}"
+          echo "::notice ::Docker image is tagged with ${IMAGE}:${TAG}"
 
       - name: Scan Docker
         if:  ${{ inputs.skip_scan == false && steps.check-build-status.outcome == 'failure' }}
@@ -132,7 +132,7 @@ jobs:
         if: ${{ inputs.additional_tag != '' &&  steps.check-build-status.outcome == 'failure' }}
         run: |
           docker tag ${IMAGE}:${TAG} ${IMAGE}:${{inputs.additional_tag}}
-          echo "Docker image is tagged with ${IMAGE}:${{inputs.additional_tag}}"
+          echo "::notice ::Docker image is tagged with ${IMAGE}:${{inputs.additional_tag}}"
 
       - name: Publish Docker
         if: ${{ inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
