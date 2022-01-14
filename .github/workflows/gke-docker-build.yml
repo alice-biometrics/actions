@@ -29,7 +29,7 @@ on:
         required: false
         type: boolean
         default: true
-      timeout_minutes: 
+      timeout_minutes:
         required: false
         type: number
         default: 30
@@ -61,10 +61,10 @@ jobs:
     name: GKE Docker Build
     runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout_minutes }}
-    
+
     outputs:
       build_timestamp: ${{ steps.update_version_and_deploy_files.outputs.build_timestamp }}
-      
+
     steps:
 
       - uses: actions/checkout@v2
@@ -81,10 +81,16 @@ jobs:
       - name: Check if docker image already exists
         id: check-build-status
         continue-on-error: true
-        run: docker manifest inspect ${IMAGE}:${TAG} > /dev/null
+        run: |
+          if docker manifest inspect ${IMAGE}:${TAG} > /dev/null 2> /dev/null; then
+              echo "::set-output name=result::exist"
+              echo "::warning ::Docker image ${IMAGE}:${TAG} already exist in the registry"
+          else
+              echo "::set-output name=result::not_exist"
+          fi
 
       - name: Update VERSION and DEPLOY Files (if the app folder exists)
-        if: ${{ inputs.update_version_and_deploy_files == true && steps.check-build-status.outcome == 'failure'}}
+        if: ${{ inputs.update_version_and_deploy_files == true && steps.check-build-status.outputs.result == 'not_exist'}}
         id: update_version_and_deploy_files
         working-directory: ${{inputs.working_directory}}
         run: |
@@ -96,7 +102,7 @@ jobs:
           echo "::set-output name=build_timestamp::${BUILD_TIMESTAMP}"
 
       - name: Docker Build
-        if:  ${{ env.GITHUB_ACCESS_TOKEN == '' && steps.check-build-status.outcome == 'failure' }}
+        if:  ${{ env.GITHUB_ACCESS_TOKEN == '' && steps.check-build-status.outputs.result == 'not_exist' }}
         working-directory: ${{inputs.working_directory}}
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE})"
@@ -105,10 +111,10 @@ jobs:
           --build-arg TAG=${TAG} \
           --build-arg BUILD_TIMESTAMP=${BUILD_TIMESTAMP} \
           --build-arg IMAGE=${IMAGE} .
-          echo "Docker image is tagged with ${IMAGE}:${TAG}"
+          echo "::debug ::Docker image is tagged with ${IMAGE}:${TAG}"
 
       - name: Docker Build With GITHUB_ACCESS_TOKEN
-        if:  ${{ env.GITHUB_ACCESS_TOKEN != '' && steps.check-build-status.outcome == 'failure'}}
+        if:  ${{ env.GITHUB_ACCESS_TOKEN != '' && steps.check-build-status.outputs.result == 'not_exist'}}
         working-directory: ${{inputs.working_directory}}
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE}) with GITHUB_ACCESS_TOKEN"
@@ -119,25 +125,25 @@ jobs:
           --build-arg BUILD_TIMESTAMP=${BUILD_TIMESTAMP} \
           --build-arg IMAGE=${IMAGE} \
           --secret id=github-access-token,src=secret-github-access-token.txt .
-          echo "::notice ::Docker image is tagged with ${IMAGE}:${TAG}"
+          echo "::debug ::Docker image is tagged with ${IMAGE}:${TAG}"
 
       - name: Scan Docker
-        if:  ${{ inputs.skip_scan == false && steps.check-build-status.outcome == 'failure' }}
+        if:  ${{ inputs.skip_scan == false && steps.check-build-status.outputs.result == 'not_exist' }}
         uses: azure/container-scan@v0
         with:
           image-name: ${{env.IMAGE}}:${{env.TAG}}
           run-quality-checks: True
 
-      - name: Add Additional Tag 
-        if: ${{ inputs.additional_tag != '' &&  steps.check-build-status.outcome == 'failure' }}
+      - name: Add Additional Tag
+        if: ${{ inputs.additional_tag != '' &&  steps.check-build-status.outputs.result == 'not_exist' }}
         run: |
           docker tag ${IMAGE}:${TAG} ${IMAGE}:${{inputs.additional_tag}}
-          echo "::notice ::Docker image is tagged with ${IMAGE}:${{inputs.additional_tag}}"
+          echo "::debug ::Docker image is tagged with ${IMAGE}:${{inputs.additional_tag}}"
 
       - name: Publish Docker
-        if: ${{ inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
+        if: ${{ inputs.publish == true && steps.check-build-status.outputs.result == 'not_exist' }}
         run: docker push ${IMAGE}:${TAG}
 
       - name: Publish Additional Tag
-        if: ${{ inputs.additional_tag != '' && inputs.publish == true && steps.check-build-status.outcome == 'failure' }}
+        if: ${{ inputs.additional_tag != '' && inputs.publish == true && steps.check-build-status.outputs.result == 'not_exist' }}
         run: docker push ${IMAGE}:${{inputs.additional_tag}}
