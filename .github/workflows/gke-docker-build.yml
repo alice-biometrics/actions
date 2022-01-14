@@ -31,7 +31,7 @@ on:
         default: true
       timeout_minutes: 
         required: false
-        type: string
+        type: number
         default: 30
       skip_scan:
         required: false
