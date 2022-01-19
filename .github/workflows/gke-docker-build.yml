@@ -37,6 +37,10 @@ on:
         required: false
         type: boolean
         default: false
+      pre_build:
+        required: false
+        type: string
+        default: ""
     outputs:
       build_timestamp:
         description: "Timestamp for the time just prior to build"
@@ -112,6 +116,11 @@ jobs:
           --build-arg BUILD_TIMESTAMP=${BUILD_TIMESTAMP} \
           --build-arg IMAGE=${IMAGE} .
           echo "::debug ::Docker image is tagged with ${IMAGE}:${TAG}"
+
+      - name: Pre-Build
+        if: ${{ inputs.pre_build != '' }}
+        working-directory: ${{inputs.working_directory}}
+        run: ${{ inputs.pre_build }}
 
       - name: Docker Build With GITHUB_ACCESS_TOKEN
         if:  ${{ env.GITHUB_ACCESS_TOKEN != '' && steps.check-build-status.outputs.result == 'not_exist'}}
