@@ -113,7 +113,7 @@ jobs:
           DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
           --build-arg REGISTRY=${REGISTRY} \
           --build-arg TAG=${TAG} \
-          --build-arg BUILD_TIMESTAMP=${BUILD_TIMESTAMP} \
+          --build-arg BUILD_TIMESTAMP="${{steps.update_version_and_deploy_files.outputs.build_timestamp}}" \
           --build-arg IMAGE=${IMAGE} .
           echo "::debug ::Docker image is tagged with ${IMAGE}:${TAG}"
 
@@ -131,7 +131,7 @@ jobs:
           DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
           --build-arg REGISTRY=${REGISTRY} \
           --build-arg TAG=${TAG} \
-          --build-arg BUILD_TIMESTAMP=${BUILD_TIMESTAMP} \
+          --build-arg BUILD_TIMESTAMP="${{steps.update_version_and_deploy_files.outputs.build_timestamp}}" \
           --build-arg IMAGE=${IMAGE} \
           --secret id=github-access-token,src=secret-github-access-token.txt .
           echo "::debug ::Docker image is tagged with ${IMAGE}:${TAG}"
