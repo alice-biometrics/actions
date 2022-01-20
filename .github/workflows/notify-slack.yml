@@ -8,9 +8,6 @@ on:
         type: string
       title:
         required: true
-        type: string 
-      chart:
-        required: true
         type: string        
       message:
         required: true
