@@ -74,6 +74,8 @@ jobs:
           fi
       - name: Install
         run: lume -install
+      - name: Setup (If required)
+        run: lume -setup --no-strict
       - name: Check Requirements
         run: lume -check-requirements
       - name: Static Analysis
