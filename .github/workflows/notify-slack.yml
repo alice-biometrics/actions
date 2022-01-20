@@ -8,7 +8,7 @@ on:
         type: string
       title:
         required: true
-        type: string        
+        type: string 
       message:
         required: true
         type: string
@@ -37,7 +37,7 @@ env:
   SLACK_ICON: ${{ inputs.icon }}  
   SLACK_FOOTER: 'Repository: ${{ github.repository }}'
   SLACK_COLOR: ${{ inputs.color }}  
-  MSG_MINIMAL: 'Repository: ${{ github.repository }}'
+  MSG_MINIMAL: actions url
 
 jobs:
   notify-slack:
