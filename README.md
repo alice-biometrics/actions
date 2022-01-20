@@ -200,8 +200,11 @@ This workflow will run the following steps:
 ##### Secrets
 
 | Name                   | Requirement | Description                                                                            |
-| ---------------------- | ----------- | -------------------------------------------------------------------------------------- |
+| ---------------------- |-------------| -------------------------------------------------------------------------------------- |
 | `github_access_token`  | _optional_  | Only required if you need the token to be passed to requirements or dependency manager | 
+| `gke_project`  | _optional_  | ID of the Google Cloud Platform project. If provided, this will configure `gcloud` to use this project ID by default for commands. |
+| `gke_key`   | _optional_  | The service account key which will be used for authentication credentials. This key should be [created](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and stored as a [secret](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets). It can be encoded as a [Base64](https://en.wikipedia.org/wiki/Base64) string or as JSON. |
+
 
 ##### Lume Config File (Required in your repository)
 
