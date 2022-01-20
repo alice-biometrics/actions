@@ -56,7 +56,7 @@ jobs:
           cd ${{inputs.chart}}/chart
           sed -ri 's/^(\s*)(tag:.*$)/\1tag: ${{inputs.version}}/' values-${{inputs.environment}}.yaml
           cp values-${{inputs.environment}}.yaml values-${{inputs.environment}}.yaml.old
-          git add -u
+          git add values-${{inputs.environment}}.yaml.old
           git config --global user.email "dev@alicebiometrics.com"
           git config --global user.name "Alice Biometrics"
           git commit -m "ENH. ${{inputs.chart}}. Update image to ${{inputs.version}} (${{inputs.environment}})"
