@@ -12,7 +12,7 @@ on:
         required: false
         type: string
         default: latest
-      lume_config_filename: 
+      lume_config_filename:
         required: false
         type: string
         default: lume.yml
@@ -21,12 +21,18 @@ on:
         type: string
         default: ""
     secrets:
+      gke_project:
+        required: false
+      gke_key:
+        required: false
       github_access_token:
         required: false
 
 env:
   LUME_CONFIG_FILENAME: ${{ inputs.lume_config_filename}}
   GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token}}
+  GKE_PROJECT: ${{ secrets.gke_project}}
+  GKE_KEY: ${{ secrets.gke_key}}
 
 jobs:
   lume-ci:
@@ -35,16 +41,26 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v2
+
+      - uses: google-github-actions/setup-gcloud@v0.2.1
+        if: env.GKE_PROJECT && env.GKE_KEY
+        with:
+          project_id: ${{ secrets.gke_project }}
+          service_account_key: ${{ secrets.gke_key }}
+          export_default_credentials: true
+
       - name: Setup Python
         if: ${{ inputs.language == 'python' }}
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
+
       - uses: actions/cache@v2
         if: ${{ inputs.language == 'python' }}
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('dev-requirements.txt') }}
+
       - name: Setup Node
         uses: actions/setup-node@v2
         if: ${{ inputs.language == 'node' }}
@@ -52,10 +68,12 @@ jobs:
           node-version: 12
           registry-url: https://npm.pkg.github.com
           always-auth: true
+
       - name: Get yarn cache directory path
         if: ${{ inputs.language == 'node' }}
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
+
       - uses: actions/cache@v2
         if: ${{ inputs.language == 'node' }}
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
@@ -64,6 +82,7 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
+
       - name: Lume
         run: |
           version=${{ inputs.lume_version}}
@@ -72,22 +91,31 @@ jobs:
           else
               pip install -U lume==$version
           fi
+
       - name: Install
         run: lume -install
+
       - name: Setup (If required)
         run: lume -setup --no-strict
+
       - name: Check Requirements
         run: lume -check-requirements
+
       - name: Static Analysis
         run: lume -static-analysis
+
       - name: Lint
         run: lume -lint
+
       - name: Unit Tests
         run: lume -test-unit
+
       - name: Integration Tests
         run: lume -test-integration
+
       - name: Acceptance Tests
         run: lume -test-acceptance
+
       - name: Additional Commands
         run: |
            additional_commands=(`echo ${{ inputs.additional_commands}} | sed 's/,/\n/g'`)
