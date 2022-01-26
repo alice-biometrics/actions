@@ -11,6 +11,10 @@ on:
         required: true
         type: string
         description: Deploy timestamps (you can obtained with date -u --rfc-3339=seconds)
+      working_directory:
+        required: false
+        type: string
+        default: .
     secrets:
       github_access_token:
         required: true
@@ -26,6 +30,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Update VERSION file
+      working-directory: ${{inputs.working_directory}}
       run: |
         if [ "$VERSION" != "" ]; then
           echo ${VERSION} > app/VERSION
@@ -34,6 +39,7 @@ jobs:
           exit 1
         fi
     - name: Update DEPLOY file
+      working-directory: ${{inputs.working_directory}}
       run: |
         if [ "$DEPLOY_TIMESTAMP" != "" ]; then
           echo ${DEPLOY_TIMESTAMP} > app/DEPLOY
@@ -41,8 +47,10 @@ jobs:
           echo "::warning ::Input deploy_timestamp is empty"
         fi
     - name: Add to git VERSION file
+      working-directory: ${{inputs.working_directory}}
       run: git add app/VERSION
     - name: Add to git DEPLOY file
+      working-directory: ${{inputs.working_directory}}
       run: git add app/DEPLOY
     - name: Commit files
       run: |
