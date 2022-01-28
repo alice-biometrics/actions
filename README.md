@@ -391,8 +391,50 @@ This action downloads a repository and copy its contain to a defined folder.
 | `github_access_token` | _required_  | Used to push changes to git |  
 
 
+### Set Global variable 📁
 
+This action sets a global variable, and you can share it across different jobs. 
+This solution has been created as a workaround to bypass current GitHub Action limitation.
 
+❌ `The workflow is not valid. .github/workflows/<YOUR-WORKFLOW>.yml (Line: XX, Col: XX): Unrecognized named-value: 'env'. Located at position 1 within expression: env.MY_VAR
+`
+
+To bypass this limitation just use set-global action.
+
+*Example:*
+```yml
+   set-global:
+    uses: alice-biometrics/actions/.github/workflows/set-global.yml@main
+    with:
+      value: My Global Value
+```
+
+##### Inputs
+
+| Name    | Requirement  | Description                                           |
+|---------|--------------|-------------------------------------------------------|
+| `value` | _required_   | Global Value (This will be redirect to the job output |
+
+##### Outputs
+
+| Name    | Description |
+|---------|-------------| 
+| `value` | Set Value   | 
+
+Example to get this output:
+
+```yml
+set-global:
+uses: alice-biometrics/actions/.github/workflows/set-global.yml@main
+with:
+  value: My Global Value
+print-version:
+    needs: set-global
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Version
+        run: echo "Global: ${{ needs.set-global.value }}"
+```
 
 
 ## Contact :mailbox_with_mail:

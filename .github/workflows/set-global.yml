@@ -1,0 +1,28 @@
+name: Set Output
+
+on:
+  workflow_call:
+    inputs:
+      value:
+        required: true
+        type: string
+    outputs:
+      value:
+        description: "Global Value"
+        value: ${{ jobs.set-global.outputs.value }}
+
+env:
+  VALUE: ${{ inputs.value }}
+
+jobs:
+  set-global:
+    name: Set Global
+    runs-on: ubuntu-latest
+    outputs:
+      value: ${{ steps.set-input.outputs.value }}
+
+    steps:
+      - name: Set Input
+        id: set-input
+        run: |
+          echo "::set-output name=value::${VALUE}"
