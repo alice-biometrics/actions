@@ -94,22 +94,6 @@ This action updates, tests and deploys every changes on helm charts
       github_access_token: ${{ secrets.MY_GITHUB_ACCESS_TOKEN }}
 ```
 
- chart:
-        required: true
-        type: string 
-      environment:
-        required: true
-        type: string 
-      version:
-        required: true
-        type: string
-      test_deploy:
-        required: false
-        type: boolean
-        default: false
-      helm_deploy_args:
-        required: false
-        type: string
 
 ##### Inputs
 
@@ -119,7 +103,7 @@ This action updates, tests and deploys every changes on helm charts
 | `environment`  | _required_  |          | Environment to deploy                                                            |
 | `version`      | _required_  | Dockerfile | Image Version to deploy                                                        |
 | `test_deploy`  | _optional_  | false    | Test deployment chart using kind.                                                |
-| `helm_deploy_args`  | _optional_  | ""  | Add some args to helm deploy command (e.g use `--dry-run` to test your workflow) |
+| `helm_deploy_args`  | _optional_  | "--wait --timeout 60"  | Add some args to helm deploy command (e.g use `--dry-run` to test your workflow) |
 
 
 ##### Outputs
