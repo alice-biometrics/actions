@@ -37,7 +37,7 @@ jobs:
           rm -rf tmp
           if [[ -z "$(git status --porcelain)" ]];
           then
-            echo "::notice ::${{ inputs.folder }} will not be update"
+            echo "::notice ::${{ inputs.folder }} will not be updated"
           else
             git add ${{ inputs.folder }}
             git config --global user.email "dev@alicebiometrics.com"
