@@ -16,6 +16,10 @@ on:
         required: false
         type: string
         default: lume.yml
+      post_setup_commands:
+        required: false
+        type: string
+        default: ""
       additional_commands:
         required: false
         type: string
@@ -97,6 +101,11 @@ jobs:
 
       - name: Setup (If required)
         run: lume -setup --no-strict
+
+      - name: Post Setup Commands
+        run: |
+          post_setup_commands=(`echo ${{ inputs.post_setup_commands}} | sed 's/,/\n/g'`)
+          for command in ${post_setup_commands[@]}; do lume -$command; done
 
       - name: Check Requirements
         run: lume -check-requirements
