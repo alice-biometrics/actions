@@ -24,7 +24,7 @@ on:
         required: false
         type: string
         description: Add some args to helm deploy command (e.g use `--dry-run` to test your workflow)
-        default: "--wait --timeout 60"
+        default: "--install --wait --timeout 60 --atomic"
     secrets:
       github_access_token:
         required: false
@@ -88,7 +88,7 @@ jobs:
       - name: Rollback Helm Deploy
         if:  ${{ steps.helm-deploy.outcome == 'failure' }}
         run: |
-          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old --install --wait --atomic --namespace ${{inputs.environment}}        
+          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old ${{secrets.helm_deploy_args}} --namespace ${{inputs.environment}}        
           echo "::error ::Failure on Helm Deploy"
       - name: Restore Reference Docker Image
         if:  ${{ steps.helm-deploy.outcome == 'failure' }}
@@ -98,14 +98,8 @@ jobs:
           git config --global user.email "dev@alicebiometrics.com"
           git config --global user.name "Alice Biometrics"          
           git add -u 
-          echo "::notice ::Restoring previous chart values"
-      - name: Purge old Reference Image
-        if:  ${{ steps.helm-deploy.outcome == 'success' }}
-        run: |
-          rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
-          git config --global user.email "dev@alicebiometrics.com"
-          git config --global user.name "Alice Biometrics"          
-          git add -u
+          git commit -m "${{inputs.chart}} (${{inputs.environment}}): Restoring previous chart values"
+          echo "::notice ::${{inputs.chart}} (${{inputs.environment}}): Restoring previous chart values"
       - name: Push changes
         uses: alice-biometrics/github-push-action@master
         with:

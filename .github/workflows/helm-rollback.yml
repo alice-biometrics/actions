@@ -41,22 +41,22 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
       - name: Rollback Helm Deploy
+        id: helm-rollback
         run: |
           gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
           helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old --install --wait --atomic --namespace ${{inputs.environment}}        
       - name: Restore Reference Docker Image
+        if: ${{ steps.helm-rollback.outcome == 'failure' }}
         run: |
-          cp ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
-          rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
-          git config --global user.email "dev@alicebiometrics.com"
-          git config --global user.name "Alice Biometrics"          
-          git add -u 
+          echo "::error ::${{inputs.chart}} (${{inputs.environment}}): Please review old chart (${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old"
       - name: Purge old Reference Image
+        if: ${{ steps.helm-rollback.outcome == 'success' }}
         run: |
           rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
           git config --global user.email "dev@alicebiometrics.com"
           git config --global user.name "Alice Biometrics"          
           git add -u
+          git commit -m "${{inputs.chart}} (${{inputs.environment}}): Remove old chart (${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old)"
       - name: Push changes
         uses: alice-biometrics/github-push-action@master
         with:
