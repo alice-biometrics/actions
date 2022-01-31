@@ -179,6 +179,7 @@ This workflow will run the following steps:
 | `language`             | _required_  |      | Select the language (Use python or node)                                                                                        |
 | `lume_version`         | _optional_  | latest | Select the lume version if required. Check the [release history](https://pypi.org/project/lume/#history)                        |
 | `lume_config_filename` | _optional_  | lume.yml | In case you want to change the name of the lume configuration file or just store in another folder                              |
+| `post_setup_commands` | _optional_  |  | Set additional lume commands to be executed after the setup and before required ones. Use commas if you need to execute several commands |
 | `additional_commands` | _optional_  |  | Set additional lume commands to be executed at the end of the required ones. Use commas if you need to execute several commands |
 
 ##### Secrets
@@ -224,6 +225,7 @@ If you want to change or fix a lume version and also execute additional lume com
     with:
       language: python
       lume_version: 0.5.2
+      post_setup_commands: build # should be available on lume.yml otherwise those won't be executed
       additional_commands: my-additional-command-1,my-additional-command-2 # should be available on lume.yml otherwise those won't be executed
 ```
 
