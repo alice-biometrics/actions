@@ -54,8 +54,8 @@ jobs:
         run: |
           echo "Updating docker image on chart ${{inputs.chart}} (environment: ${{inputs.environment}}) to ${{inputs.version}}"
           cd ${{inputs.chart}}/chart
-          sed -ri 's/^(\s*)(tag:.*$)/\1tag: ${{inputs.version}}/' values-${{inputs.environment}}.yaml
           cp values-${{inputs.environment}}.yaml values-${{inputs.environment}}.yaml.old
+          sed -ri 's/^(\s*)(tag:.*$)/\1tag: ${{inputs.version}}/' values-${{inputs.environment}}.yaml
           git add values-${{inputs.environment}}.yaml.old
           git add values-${{inputs.environment}}.yaml
           git config --global user.email "dev@alicebiometrics.com"
