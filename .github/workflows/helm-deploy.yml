@@ -74,11 +74,12 @@ jobs:
       - name: Chart Helm Deploy
         if: ${{ inputs.test_deploy }}
         run: helm install ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
-      - uses: google-github-actions/setup-gcloud@v0.2.1
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0
         with:
-          project_id:  ${{secrets.gke_project}}
-          service_account_key: ${{ secrets.gke_key }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.gke_key }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
       - name: Helm Deploy
         id: helm-deploy
         run: |
