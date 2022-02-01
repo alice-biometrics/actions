@@ -24,7 +24,7 @@ on:
         required: false
         type: string
         description: Add some args to helm deploy command (e.g use `--dry-run` to test your workflow)
-        default: "--install --wait --timeout 60s --atomic"
+        default: "--install --wait --atomic"
     secrets:
       github_access_token:
         required: false
