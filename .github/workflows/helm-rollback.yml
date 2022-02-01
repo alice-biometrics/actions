@@ -52,6 +52,7 @@ jobs:
       - name: Purge old Reference Image
         if: ${{ steps.helm-rollback.outcome == 'success' }}
         run: |
+          git pull
           cp ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
           rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
           git config --global user.email "dev@alicebiometrics.com"
