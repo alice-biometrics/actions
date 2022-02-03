@@ -56,16 +56,6 @@ jobs:
           cd ${{inputs.chart}}/chart
           cp values-${{inputs.environment}}.yaml values-${{inputs.environment}}.yaml.old
           sed -ri 's/^(\s*)(tag:.*$)/\1tag: ${{inputs.version}}/' values-${{inputs.environment}}.yaml
-          git add values-${{inputs.environment}}.yaml.old
-          git add values-${{inputs.environment}}.yaml
-          git config --global user.email "dev@alicebiometrics.com"
-          git config --global user.name "Alice Biometrics"
-          git commit -m "ENH. ${{inputs.chart}}. Update image to ${{inputs.version}} (${{inputs.environment}})"
-      - name: Push changes
-        uses: alice-biometrics/github-push-action@master
-        with:
-          github_token: ${{ secrets.github_access_token}} 
-          repository: alice-biometrics/alice-k8s-cloud
       - name: Chart Helm Linter
         id: linter
         run: helm lint ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
@@ -91,17 +81,15 @@ jobs:
         run: |
           helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old ${{inputs.helm_deploy_args}} --namespace ${{inputs.environment}}        
           echo "::error ::Failure on Helm Deploy"
-      - name: Restore Reference Docker Image
-        if:  ${{ steps.helm-deploy.outcome == 'failure' }}
+      - name: Commit changes
+        if: ${{ steps.helm-deploy.outcome == 'success' }}
         run: |
           git pull
-          cp ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
-          rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
+          git add values-${{inputs.environment}}.yaml.old
+          git add values-${{inputs.environment}}.yaml
           git config --global user.email "dev@alicebiometrics.com"
-          git config --global user.name "Alice Biometrics"          
-          git add -u 
-          git commit -m "${{inputs.chart}} (${{inputs.environment}}): Restoring previous chart values"
-          echo "::notice ::${{inputs.chart}} (${{inputs.environment}}): Restoring previous chart values"
+          git config --global user.name "Alice Biometrics"
+          git commit -m "ENH. ${{inputs.chart}}. Update image to ${{inputs.version}} (${{inputs.environment}})"
       - name: Push changes
         uses: alice-biometrics/github-push-action@master
         with:
