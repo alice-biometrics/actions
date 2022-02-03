@@ -24,7 +24,7 @@ on:
         required: false
         type: string
         description: Add some args to helm deploy command (e.g use `--dry-run` to test your workflow)
-        default: "--install --wait --atomic"
+        default: "--install --wait --atomic --debug"
     secrets:
       github_access_token:
         required: false
@@ -51,9 +51,9 @@ jobs:
           repository: alice-biometrics/alice-k8s-cloud
           token: ${{ secrets.github_access_token}}   
       - name: Update Docker Image
+        working-directory: ${{inputs.chart}}/chart
         run: |
           echo "Updating docker image on chart ${{inputs.chart}} (environment: ${{inputs.environment}}) to ${{inputs.version}}"
-          cd ${{inputs.chart}}/chart
           cp values-${{inputs.environment}}.yaml values-${{inputs.environment}}.yaml.old
           sed -ri 's/^(\s*)(tag:.*$)/\1tag: ${{inputs.version}}/' values-${{inputs.environment}}.yaml
       - name: Chart Helm Linter
@@ -83,6 +83,7 @@ jobs:
           echo "::error ::Failure on Helm Deploy"
       - name: Commit changes
         if: ${{ steps.helm-deploy.outcome == 'success' }}
+        working-directory: ${{inputs.chart}}/chart
         run: |
           git pull
           git add values-${{inputs.environment}}.yaml.old
