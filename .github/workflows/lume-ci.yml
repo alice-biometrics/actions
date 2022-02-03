@@ -16,7 +16,15 @@ on:
         required: false
         type: string
         default: lume.yml
+      pre_commands:
+        required: false
+        type: string
+        default: ""
       post_setup_commands:
+        required: false
+        type: string
+        default: ""
+      post_commands:
         required: false
         type: string
         default: ""
@@ -96,6 +104,11 @@ jobs:
               pip install -U lume==$version
           fi
 
+      - name: Pre Commands
+        run: |
+          pre_commands=(`echo ${{ inputs.pre_commands}} | sed 's/,/\n/g'`)
+          for command in ${pre_commands[@]}; do lume -$command; done
+
       - name: Install
         run: lume -install
 
@@ -125,7 +138,11 @@ jobs:
       - name: Acceptance Tests
         run: lume -test-acceptance
 
-      - name: Additional Commands
+      - name: Post Commands
         run: |
+           post_commands=(`echo ${{ inputs.post_commands}} | sed 's/,/\n/g'`)
+           for command in ${post_commands[@]}; do lume -$command; done
+           
+           # deprecated
            additional_commands=(`echo ${{ inputs.additional_commands}} | sed 's/,/\n/g'`)
            for command in ${additional_commands[@]}; do lume -$command; done
