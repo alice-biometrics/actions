@@ -156,5 +156,5 @@ jobs:
             echo "lume -$post_commands" | bash -
           fi
            # deprecated
-           additional_commands=(`echo ${{ inputs.additional_commands}} | sed 's/,/\n/g'`)
-           for command in ${additional_commands[@]}; do lume -$command; done
+           #cadditional_commands=(`echo ${{ inputs.additional_commands}} | sed 's/,/\n/g'`)
+           #cfor command in ${additional_commands[@]}; do lume -$command; done
