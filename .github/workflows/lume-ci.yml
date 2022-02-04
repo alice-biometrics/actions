@@ -107,7 +107,7 @@ jobs:
       - name: Pre Commands
         run: |
           IFS=""
-          pre_commands=(`echo ${{ inputs.pre_commands}} | sed 's/,/\n/g'`)
+          pre_commands=(`echo '${{ inputs.pre_commands}}' | sed 's/,/\n/g'`)
           for command in ${pre_commands[@]}; do lume -$command; done
 
       - name: Install
@@ -118,9 +118,8 @@ jobs:
 
       - name: Post Setup Commands
         run: |
-          echo ${{ inputs.post_setup_commands}}
           IFS=""
-          post_setup_commands=(`echo ${{ inputs.post_setup_commands}} | sed 's/,/\n/g'`)
+          post_setup_commands=(`echo '${{ inputs.post_setup_commands}}' | sed 's/,/\n/g'`)
           for command in ${post_setup_commands[@]}; do lume -$command; done
 
       - name: Check Requirements
