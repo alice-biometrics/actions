@@ -21,6 +21,10 @@ on:
         required: false
         type: string
         default: https://raw.githubusercontent.com/alice-biometrics/custom-emojis/master/images/alice_bot.png
+      icon-emoji:
+        required: false
+        type: string
+        default: "not_set"
       username:
         required: false
         type: string
@@ -33,8 +37,7 @@ env:
   SLACK_CHANNEL: ${{ inputs.channel }}  
   SLACK_TITLE: ${{ inputs.title }}  
   SLACK_MESSAGE: ${{ inputs.message }}  
-  SLACK_USERNAME: ${{ inputs.username }}  
-  SLACK_ICON: ${{ inputs.icon }}  
+  SLACK_USERNAME: ${{ inputs.username }}
   SLACK_FOOTER: 'Repository: ${{ github.repository }}'
   SLACK_COLOR: ${{ inputs.color }}  
   MSG_MINIMAL: actions url
@@ -45,6 +48,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Set environment variables
+      run: |
+        if [[ ${{ inputs.icon-emoji }} == "not_set" ]]; then
+          echo "SLACK_ICON=${{ inputs.icon }}" >> $GITHUB_ENV
+        else
+          echo "SLACK_ICON_EMOJI=${{ inputs.icon-emoji }}" >> $GITHUB_ENV
+        fi
     - name: Slack Notification
       uses: rtCamp/action-slack-notify@v2
       env:
@@ -53,7 +63,6 @@ jobs:
         SLACK_TITLE: ${{ env.SLACK_TITLE }}
         SLACK_MESSAGE: ${{ env.SLACK_MESSAGE }}
         SLACK_COLOR: ${{ env.SLACK_COLOR }}
-        SLACK_ICON: ${{ env.SLACK_ICON }}
         SLACK_WEBHOOK: ${{ secrets.slack_token }}
         MSG_MINIMAL: ${{ env.MSG_MINIMAL }}
         SLACK_FOOTER: ${{ env.SLACK_FOOTER }}

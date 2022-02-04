@@ -103,9 +103,13 @@ jobs:
       - name: Pre Commands
         if: ${{ inputs.pre_commands != '' }}
         run: |
-          IFS=""
-          pre_commands=(`echo ${{ inputs.pre_commands}} | sed 's/,/\n/g'`)
-          for command in ${pre_commands[@]}; do lume -$command; done
+          IFS=","
+          read -r -a pre_commands <<< "${{ inputs.pre_commands}}"
+          if [[ ${#pre_commands[@]} > 1 ]]; then
+            for command in ${pre_commands[@]}; do lume -$command; done
+          elif  [[ ${#pre_commands[@]} = 1 ]]; then
+            echo "lume -$pre_commands" | bash -
+          fi
 
       - name: Install
         run: lume -install
@@ -116,9 +120,13 @@ jobs:
       - name: Post Setup Commands
         if: ${{ inputs.post_setup_commands != '' }}
         run: |
-          IFS=""
-          post_setup_commands=(`echo ${{ inputs.post_setup_commands}} | sed 's/,/\n/g'`)
-          for command in ${post_setup_commands[@]}; do lume -$command; done
+          IFS="," 
+          read -r -a post_setup_commands <<< "${{ inputs.post_setup_commands}}"
+          if [[ ${#post_setup_commands[@]} > 1 ]]; then
+            for command in ${post_setup_commands[@]}; do lume -$command; done
+          elif  [[ ${#post_setup_commands[@]} = 1 ]]; then
+            echo "lume -$post_setup_commands" | bash -
+          fi
 
       - name: Check Requirements
         run: lume -check-requirements
@@ -141,6 +149,10 @@ jobs:
       - name: Post Commands
         if: ${{ inputs.post_commands != '' }}
         run: |
-           IFS=""
-           post_commands=(`echo ${{ inputs.post_commands}} | sed 's/,/\n/g'`)
-           for command in ${post_commands[@]}; do lume -$command; done
+          IFS="," 
+          read -r -a post_commands <<< " ${{ inputs.post_commands}}"
+          if [[ ${#post_commands[@]} > 1 ]]; then
+            for command in ${post_commands[@]}; do lume -$command; done
+          elif  [[ ${#post_commands[@]} = 1 ]]; then
+            echo "lume -$post_commands" | bash -
+          fi
