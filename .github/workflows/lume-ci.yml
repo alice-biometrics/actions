@@ -107,7 +107,7 @@ jobs:
       - name: Pre Commands
         run: |
           pre_commands=()
-          IFS=',' read -r -a pre_commands <<< "$values"
+          IFS=',' read -r -a pre_commands <<< "${{ inputs.pre_commands}}"
           for command in ${pre_commands[@]}; do lume -$command; done
 
       - name: Install
@@ -119,7 +119,7 @@ jobs:
       - name: Post Setup Commands
         run: |
           post_setup_commands=()
-          IFS=',' read -r -a post_setup_commands <<< "$values"
+          IFS=',' read -r -a post_setup_commands <<< "${{ inputs.post_setup_commands}}"
           for command in ${post_setup_commands[@]}; do lume -$command; done
 
       - name: Check Requirements
@@ -143,7 +143,7 @@ jobs:
       - name: Post Commands
         run: |
           post_commands=()
-          IFS=',' read -r -a post_commands <<< "$values"
+          IFS=',' read -r -a post_commands <<< " ${{ inputs.post_commands}}"
           for command in ${post_commands[@]}; do lume -$command; done
           
            
