@@ -107,9 +107,13 @@ jobs:
       - name: Pre Commands
         run: |
           pre_commands=()
-          IFS=',' read -r -a pre_commands <<< "${{ inputs.pre_commands}}"
-          for command in ${pre_commands[@]}; do lume -$command; done
-
+          IFS=','
+          read -r -a pre_commands <<< "${{ inputs.pre_commands}}"
+          if [[ ${#pre_commands[@]} > 1 ]]; then
+            for command in ${pre_commands[@]}; do lume -$command; done
+          else
+            lume -$pre_commands
+          fi
       - name: Install
         run: lume -install
 
@@ -119,9 +123,13 @@ jobs:
       - name: Post Setup Commands
         run: |
           post_setup_commands=()
-          IFS=',' read -r -a post_setup_commands <<< "${{ inputs.post_setup_commands}}"
-          for command in ${post_setup_commands[@]}; do lume -$command; done
-
+          IFS=',' 
+          read -r -a post_setup_commands <<< "${{ inputs.post_setup_commands}}"
+          if [[ ${#post_setup_commands[@]} > 1 ]]; then
+            for command in ${post_setup_commands[@]}; do lume -$command; done
+          else
+            lume -post_setup_commands
+          fi
       - name: Check Requirements
         run: lume -check-requirements
 
@@ -143,10 +151,13 @@ jobs:
       - name: Post Commands
         run: |
           post_commands=()
-          IFS=',' read -r -a post_commands <<< " ${{ inputs.post_commands}}"
-          for command in ${post_commands[@]}; do lume -$command; done
-          
-           
+          IFS=',' 
+          read -r -a post_commands <<< " ${{ inputs.post_commands}}"
+          if [[ ${#post_commands[@]} > 1 ]]; then
+            for command in ${post_commands[@]}; do lume -$command; done
+          else
+            lume -post_commands
+          fi
            # deprecated
            additional_commands=(`echo ${{ inputs.additional_commands}} | sed 's/,/\n/g'`)
            for command in ${additional_commands[@]}; do lume -$command; done
