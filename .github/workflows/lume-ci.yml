@@ -111,6 +111,7 @@ jobs:
           if [[ ${#pre_commands[@]} > 1 ]]; then
             for command in ${pre_commands[@]}; do lume -$command; done
           else
+            echo "Not an array"
             lume -$pre_commands
           fi
       - name: Install
