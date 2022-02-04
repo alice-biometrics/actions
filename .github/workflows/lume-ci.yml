@@ -112,7 +112,7 @@ jobs:
           if [[ ${#pre_commands[@]} > 1 ]]; then
             for command in ${pre_commands[@]}; do lume -$command; done
           else
-            lume -$pre_commands
+            lume -$pre_commands[0]
           fi
       - name: Install
         run: lume -install
@@ -128,7 +128,7 @@ jobs:
           if [[ ${#post_setup_commands[@]} > 1 ]]; then
             for command in ${post_setup_commands[@]}; do lume -$command; done
           else
-            lume -post_setup_commands
+            lume -$post_setup_commands[0]
           fi
       - name: Check Requirements
         run: lume -check-requirements
@@ -156,7 +156,7 @@ jobs:
           if [[ ${#post_commands[@]} > 1 ]]; then
             for command in ${post_commands[@]}; do lume -$command; done
           else
-            lume -post_commands
+            lume -$post_commands[0]
           fi
            # deprecated
            additional_commands=(`echo ${{ inputs.additional_commands}} | sed 's/,/\n/g'`)
