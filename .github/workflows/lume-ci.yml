@@ -106,8 +106,8 @@ jobs:
 
       - name: Pre Commands
         run: |
-          IFS=""
-          pre_commands=(`echo '${{ inputs.pre_commands}}' | sed 's/,/\n/g'`)
+          pre_commands = []
+          IFS=',' read -r -a pre_commands <<< "$values"
           for command in ${pre_commands[@]}; do lume -$command; done
 
       - name: Install
@@ -118,8 +118,8 @@ jobs:
 
       - name: Post Setup Commands
         run: |
-          IFS=""
-          post_setup_commands=(`echo '${{ inputs.post_setup_commands}}' | sed 's/,/\n/g'`)
+          post_setup_commands = []
+          IFS=',' read -r -a post_setup_commands <<< "$values"
           for command in ${post_setup_commands[@]}; do lume -$command; done
 
       - name: Check Requirements
@@ -142,9 +142,10 @@ jobs:
 
       - name: Post Commands
         run: |
-           IFS=""
-           post_commands=(`echo ${{ inputs.post_commands}} | sed 's/,/\n/g'`)
-           for command in ${post_commands[@]}; do lume -$command; done
+          post_commands = []
+          IFS=',' read -r -a post_commands <<< "$values"
+          for command in ${post_commands[@]}; do lume -$command; done
+          
            
            # deprecated
            additional_commands=(`echo ${{ inputs.additional_commands}} | sed 's/,/\n/g'`)
