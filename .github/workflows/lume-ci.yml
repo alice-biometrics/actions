@@ -118,6 +118,7 @@ jobs:
 
       - name: Post Setup Commands
         run: |
+          echo ${{ inputs.post_setup_commands}}
           IFS=""
           post_setup_commands=(`echo ${{ inputs.post_setup_commands}} | sed 's/,/\n/g'`)
           for command in ${post_setup_commands[@]}; do lume -$command; done
