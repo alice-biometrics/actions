@@ -111,8 +111,7 @@ jobs:
           if [[ ${#pre_commands[@]} > 1 ]]; then
             for command in ${pre_commands[@]}; do lume -$command; done
           else
-            echo "Not an array"
-            lume -$pre_commands
+            echo "lume -$pre_commands" | bash -
           fi
       - name: Install
         run: lume -install
@@ -127,7 +126,7 @@ jobs:
           if [[ ${#post_setup_commands[@]} > 1 ]]; then
             for command in ${post_setup_commands[@]}; do lume -$command; done
           else
-            lume -$post_setup_commands
+            echo "lume -$post_setup_commands" | bash -
           fi
       - name: Check Requirements
         run: lume -check-requirements
@@ -154,7 +153,7 @@ jobs:
           if [[ ${#post_commands[@]} > 1 ]]; then
             for command in ${post_commands[@]}; do lume -$command; done
           else
-            lume -$post_commands
+            echo "lume -$post_commands" | bash -
           fi
            # deprecated
            additional_commands=(`echo ${{ inputs.additional_commands}} | sed 's/,/\n/g'`)
