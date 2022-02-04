@@ -152,7 +152,7 @@ jobs:
           read -r -a post_commands <<< " ${{ inputs.post_commands}}"
           if [[ ${#post_commands[@]} > 1 ]]; then
             for command in ${post_commands[@]}; do lume -$command; done
-          elif  [[ ${#$post_commands[@]} = 1 ]]; then
+          elif  [[ ${#post_commands[@]} = 1 ]]; then
             echo "lume -$post_commands" | bash -
           fi
            # deprecated
