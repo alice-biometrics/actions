@@ -106,7 +106,7 @@ jobs:
 
       - name: Pre Commands
         run: |
-          pre_commands = []
+          pre_commands=()
           IFS=',' read -r -a pre_commands <<< "$values"
           for command in ${pre_commands[@]}; do lume -$command; done
 
@@ -118,7 +118,7 @@ jobs:
 
       - name: Post Setup Commands
         run: |
-          post_setup_commands = []
+          post_setup_commands=()
           IFS=',' read -r -a post_setup_commands <<< "$values"
           for command in ${post_setup_commands[@]}; do lume -$command; done
 
@@ -142,7 +142,7 @@ jobs:
 
       - name: Post Commands
         run: |
-          post_commands = []
+          post_commands=()
           IFS=',' read -r -a post_commands <<< "$values"
           for command in ${post_commands[@]}; do lume -$command; done
           
