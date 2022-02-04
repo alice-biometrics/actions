@@ -125,7 +125,7 @@ jobs:
           read -r -a post_setup_commands <<< "${{ inputs.post_setup_commands}}"
           if [[ ${#post_setup_commands[@]} > 1 ]]; then
             for command in ${post_setup_commands[@]}; do lume -$command; done
-          elif  [[ ${#$post_setup_commands[@]} = 1 ]]; then
+          elif  [[ ${#post_setup_commands[@]} = 1 ]]; then
             echo "lume -$post_setup_commands" | bash -
           fi
       - name: Check Requirements
