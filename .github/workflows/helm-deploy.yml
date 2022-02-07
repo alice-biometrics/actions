@@ -45,23 +45,37 @@ jobs:
         uses: azure/setup-helm@v1
         with:
           version: v3.4.0
+
       - name: Checkout Helm Chart Repo
         uses: actions/checkout@v2
         with:
           repository: alice-biometrics/alice-k8s-cloud
           token: ${{ secrets.github_access_token}}   
+
       - name: Update Docker Image
         working-directory: ${{inputs.chart}}/chart
         run: |
           echo "Updating docker image on chart ${{inputs.chart}} (environment: ${{inputs.environment}}) to ${{inputs.version}}"
           cp values-${{inputs.environment}}.yaml values-${{inputs.environment}}.yaml.old
           sed -ri 's/^(\s*)(tag:.*$)/\1tag: ${{inputs.version}}/' values-${{inputs.environment}}.yaml
+
       - name: Chart Helm Linter
         id: linter
         run: helm lint ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
+
+      - name: Chart Helm Kube-score
+        uses: yokawasa/action-setup-kube-tools@v0.7.1
+        with:
+          kubectl: '1.17.1'
+          helm: '3.8.0'
+          kube-score: '1.13.0'
+        run: helm template ${{inputs.chart}}/chart -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml | kube-score score -
+        continue-on-error: true        
+
       - name: Create kind cluster for testing Chart
         if: ${{ inputs.test_deploy }}
         uses: helm/kind-action@v1.2.0
+
       - name: Chart Helm Deploy
         if: ${{ inputs.test_deploy }}
         run: helm install ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
@@ -69,6 +83,7 @@ jobs:
         uses: google-github-actions/auth@v0
         with:
           credentials_json: ${{ secrets.gke_key }}
+
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
       - name: Helm Deploy
@@ -76,11 +91,13 @@ jobs:
         run: |
           gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
           helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml ${{inputs.helm_deploy_args}} --namespace ${{inputs.environment}}
+
       - name: Rollback Helm Deploy
         if:  ${{ steps.helm-deploy.outcome == 'failure' }}
         run: |
           helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old ${{inputs.helm_deploy_args}} --namespace ${{inputs.environment}}        
           echo "::error ::Failure on Helm Deploy"
+
       - name: Commit changes
         if: ${{ steps.helm-deploy.outcome == 'success' }}
         working-directory: ${{inputs.chart}}/chart
@@ -91,6 +108,7 @@ jobs:
           git config --global user.email "dev@alicebiometrics.com"
           git config --global user.name "Alice Biometrics"
           git commit -m "ENH. ${{inputs.chart}}. Update image to ${{inputs.version}} (${{inputs.environment}})"
+
       - name: Push changes
         uses: alice-biometrics/github-push-action@master
         with:
