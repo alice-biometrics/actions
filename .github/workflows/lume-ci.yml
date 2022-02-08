@@ -150,7 +150,7 @@ jobs:
         if: ${{ inputs.post_commands != '' }}
         run: |
           IFS="," 
-          read -r -a post_commands <<< " ${{ inputs.post_commands}}"
+          read -r -a post_commands <<< "${{ inputs.post_commands}}"
           if [[ ${#post_commands[@]} > 1 ]]; then
             for command in ${post_commands[@]}; do lume -$command; done
           elif  [[ ${#post_commands[@]} = 1 ]]; then
