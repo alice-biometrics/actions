@@ -12,6 +12,10 @@ on:
         required: false
         type: string
         default: 3.9
+      runs_on:
+        required: false
+        type: string
+        default: ubuntu-latest
       lume_version:
         required: false
         type: string
@@ -49,7 +53,7 @@ env:
 jobs:
   lume-ci:
     name: Lume CI
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs_on }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v2
