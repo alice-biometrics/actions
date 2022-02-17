@@ -8,6 +8,10 @@ on:
         type: string
         default: python
         description: Select the language (Use python or node)
+      python_version:
+        required: false
+        type: string
+        default: 3.9
       lume_version:
         required: false
         type: string
@@ -61,7 +65,7 @@ jobs:
         if: ${{ inputs.language == 'python' }}
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ inputs.python_version }}
 
       - uses: actions/cache@v2
         if: ${{ inputs.language == 'python' }}
