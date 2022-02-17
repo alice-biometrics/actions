@@ -105,6 +105,12 @@ jobs:
           fi
           echo "::set-output name=build_timestamp::${BUILD_TIMESTAMP}"
 
+      - name: Hadolin - Dockerfile
+        uses: hadolint/hadolint-action@v1.6.0
+        with:
+          dockerfile: ${PWD}/${DOCKERFILE} 
+        continue-on-error: true
+
       - name: Docker Build
         if:  ${{ env.GITHUB_ACCESS_TOKEN == '' && steps.check-build-status.outputs.result == 'not_exist' }}
         working-directory: ${{inputs.working_directory}}
