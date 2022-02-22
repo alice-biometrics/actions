@@ -36,6 +36,10 @@ on:
         required: false
         type: string
         default: ""
+      use_cache:
+        required: false
+        type: boolean
+        default: true
     secrets:
       gke_project:
         required: false
@@ -72,7 +76,7 @@ jobs:
           python-version: ${{ inputs.python_version }}
 
       - uses: actions/cache@v2
-        if: ${{ inputs.language == 'python' }}
+        if: ${{ inputs.language == 'python' && inputs.use_cache == true }}
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('dev-requirements.txt') }}
@@ -86,12 +90,12 @@ jobs:
           always-auth: true
 
       - name: Get yarn cache directory path
-        if: ${{ inputs.language == 'node' }}
+        if: ${{ inputs.language == 'node' && inputs.use_cache == true }}
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
 
       - uses: actions/cache@v2
-        if: ${{ inputs.language == 'node' }}
+        if: ${{ inputs.language == 'node' && inputs.use_cache == true }}
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
