@@ -108,7 +108,7 @@ jobs:
       - name: Hadolin - Dockerfile
         uses: hadolint/hadolint-action@v1.6.0
         with:
-          dockerfile: docker/${{inputs.dockerfile}}
+          dockerfile: ${{inputs.dockerfile}}
         continue-on-error: true
 
       - name: Docker Build
