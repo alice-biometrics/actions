@@ -108,7 +108,7 @@ jobs:
       - name: Hadolin - Dockerfile
         uses: hadolint/hadolint-action@v1.6.0
         with:
-          dockerfile: ${PWD}/${DOCKERFILE} 
+          dockerfile: docker/${{inputs.dockerfile}}
         continue-on-error: true
 
       - name: Docker Build
@@ -148,6 +148,7 @@ jobs:
         with:
           image-name: ${{env.IMAGE}}:${{env.TAG}}
           run-quality-checks: True
+        continue-on-error: true          
 
       - name: Add Additional Tag
         if: ${{ inputs.additional_tag != '' &&  steps.check-build-status.outputs.result == 'not_exist' }}
