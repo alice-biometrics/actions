@@ -69,7 +69,7 @@ jobs:
           kubectl: '1.17.1'
           helm: '3.8.0'
           kube-score: '1.13.0'
-        run: helm template ${{inputs.chart}}/chart -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml | kube-score score -
+      - run: helm template ${{inputs.chart}}/chart -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml | kube-score score -
         continue-on-error: true        
 
       - name: Create kind cluster for testing Chart
