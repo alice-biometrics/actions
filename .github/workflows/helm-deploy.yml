@@ -63,13 +63,15 @@ jobs:
         id: linter
         run: helm lint ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
 
-      - name: Chart Helm Kube-score
+      - name: Install Helm Kube-score
         uses: yokawasa/action-setup-kube-tools@v0.7.1
         with:
           kubectl: '1.17.1'
           helm: '3.8.0'
           kube-score: '1.13.0'
-      - run: helm template ${{inputs.chart}}/chart -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml | kube-score score -
+
+      - name: Launch Helm Kube-score          
+        run: helm template ${{inputs.chart}}/chart -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml | kube-score score -
         continue-on-error: true        
 
       - name: Create kind cluster for testing Chart
