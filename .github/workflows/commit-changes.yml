@@ -15,6 +15,10 @@ on:
         required: false
         type: string
         default: .
+      target_directory:
+        required: false
+        type: string
+        default: app
     secrets:
       github_access_token:
         required: true
@@ -22,6 +26,7 @@ on:
 env:
   VERSION: ${{ inputs.version }}
   DEPLOY_TIMESTAMP: ${{ inputs.deploy_timestamp }}
+  TARGET_DIRECTORY: ${{inputs.target_directory}}
 
 jobs:
   commit-changes:
@@ -33,7 +38,7 @@ jobs:
       working-directory: ${{inputs.working_directory}}
       run: |
         if [ "$VERSION" != "" ]; then
-          echo ${VERSION} > app/VERSION
+          echo ${VERSION} > ${TARGET_DIRECTORY}/VERSION
         else
           echo "::error ::Input version cannot be empty"
           exit 1
@@ -42,16 +47,16 @@ jobs:
       working-directory: ${{inputs.working_directory}}
       run: |
         if [ "$DEPLOY_TIMESTAMP" != "" ]; then
-          echo ${DEPLOY_TIMESTAMP} > app/DEPLOY
+          echo ${DEPLOY_TIMESTAMP} > ${TARGET_DIRECTORY}/DEPLOY
         else
           echo "::warning ::Input deploy_timestamp is empty"
         fi
     - name: Add to git VERSION file
       working-directory: ${{inputs.working_directory}}
-      run: git add app/VERSION
+      run: git add ${TARGET_DIRECTORY}/VERSION
     - name: Add to git DEPLOY file
       working-directory: ${{inputs.working_directory}}
-      run: git add app/DEPLOY
+      run: git add ${TARGET_DIRECTORY}/DEPLOY
     - name: Commit files
       run: |
         git config --global user.email "dev@alicebiometrics.com"

@@ -333,10 +333,12 @@ This action modify two files (VERSION, DEPLOY) and push changes to the repositor
 
 ##### Inputs
 
-| Name                | Requirement | Default | Description                 |
-| -----------         | ----------- | ------- | --------------------------- |
-| `version`           | _required_  |         | Version of the application  |
-| `deploy_timestamp`  | _required_  |         | Deploy timestamps (you can obtained with `date -u --rfc-3339=seconds`) |
+| Name               | Requirement | Default | Description                                                           |
+|--------------------|-------------|-------|-----------------------------------------------------------------------|
+| `version`          | _required_  |       | Version of the application                                            |
+| `deploy_timestamp` | _required_  |       | Deploy timestamps (you can obtained with `date -u --rfc-3339=seconds`) |
+| `working_directory` | _optional_  |       | Working directory                                                     |
+| `target_directory` | _optional_  | app   | Target folder where VERSION and DEPLOY files will be stored           |
 
 
 ##### Secrets
