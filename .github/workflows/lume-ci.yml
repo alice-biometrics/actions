@@ -40,6 +40,10 @@ on:
         required: false
         type: boolean
         default: true
+      working_directory:
+        required: false
+        type: string
+        default: .
     secrets:
       gke_project:
         required: false
@@ -104,6 +108,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Lume
+        working-directory: ${{inputs.working_directory}}
         run: |
           version=${{ inputs.lume_version}}
           if [ "$version" = "latest" ]; then
@@ -114,6 +119,7 @@ jobs:
 
       - name: Pre Commands
         if: ${{ inputs.pre_commands != '' }}
+        working-directory: ${{inputs.working_directory}}
         run: |
           IFS=","
           read -r -a pre_commands <<< "${{ inputs.pre_commands}}"
@@ -124,12 +130,15 @@ jobs:
           fi
 
       - name: Install
+        working-directory: ${{inputs.working_directory}}
         run: lume -install
 
       - name: Setup (If required)
+        working-directory: ${{inputs.working_directory}}
         run: lume -setup --no-strict
 
       - name: Post Setup Commands
+        working-directory: ${{inputs.working_directory}}
         if: ${{ inputs.post_setup_commands != '' }}
         run: |
           IFS="," 
@@ -141,24 +150,31 @@ jobs:
           fi
 
       - name: Check Requirements
+        working-directory: ${{inputs.working_directory}}
         run: lume -check-requirements
 
       - name: Static Analysis
+        working-directory: ${{inputs.working_directory}}
         run: lume -static-analysis
 
       - name: Lint
+        working-directory: ${{inputs.working_directory}}
         run: lume -lint
 
       - name: Unit Tests
+        working-directory: ${{inputs.working_directory}}
         run: lume -test-unit
 
       - name: Integration Tests
+        working-directory: ${{inputs.working_directory}}
         run: lume -test-integration
 
       - name: Acceptance Tests
+        working-directory: ${{inputs.working_directory}}
         run: lume -test-acceptance
 
       - name: Post Commands
+        working-directory: ${{inputs.working_directory}}
         if: ${{ inputs.post_commands != '' }}
         run: |
           IFS="," 
