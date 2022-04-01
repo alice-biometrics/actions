@@ -20,7 +20,7 @@ on:
         required: false
 
 jobs:
-  create_change:
+  create-change:
     runs-on: ubuntu-latest
     steps:
       - name: Create Change
