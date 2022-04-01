@@ -1,0 +1,30 @@
+name: Create Change
+
+on:
+  workflow_call:
+    inputs:
+      chart:
+        required: true
+        type: string
+        description: Chart Deployed
+      environment:
+        required: true
+        type: string
+        description: Environment used for Deploy
+      version:
+        required: true
+        type: string
+        description: Image Version Deployed
+jobs:
+  create_change:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Change
+        run: |
+          curl --silent -u ${{ secrets.FRESHDESK_API_KEY }} -H "Content-Type: application/json" -X POST -d '{ "description": "'New alice-biometrics/${{inputs.chart}}* version *(${{ inputs.version }})* has been deployed", "subject": "[${{inputs.chart}}] - New version ${{inputs.version}} Deployed - ${{inputs.environment}}", "email": "infra@alicebiometrics.com", "source": 3, "type": "Cambio", "priority": 1, "status": 2, "cc_emails": ["infra@alicebiometrics.com"], "product_id": 47000002862, "custom_fields": { "cf_customer_ticket_type": "None of the above", "cf_platform": "Microservices", "cf_stage": "${{ github.event.inputs.environment }}", "cf_tipo_de_cambio257820": "Minor", "cf_urgencia": "Low", "cf_impacto": "Low"} }' 'https://alicebiometrics.freshdesk.com/api/v2/tickets'
+
+      - name: Update & Close Change
+        run: |
+          ticket_id=`curl --silent -u ${{ secrets.FRESHDESK_API_KEY }} -X GET 'https://alicebiometrics.freshdesk.com/api/v2/tickets' | jq '.[] | .id' | head -n1`
+          curl --silent -u ${{ secrets.FRESHDESK_API_KEY }} -H "Content-Type: application/json" -X PUT -d '{ "status": '5'}' https://alicebiometrics.freshdesk.com/api/v2/tickets/$ticket_id
+
