@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Create Change
         run: |
-          curl --silent -u ${{ secrets.FRESHDESK_API_KEY }} -H "Content-Type: application/json" -X POST -d '{ "description": "New alice-biometrics/*${{inputs.chart}}* version *(${{ inputs.version }})* has been deployed", "subject": "[${{inputs.chart}}] - Deployed - ${{inputs.environment}} - Version ${{inputs.version}}"", "email": "infra@alicebiometrics.com", "source": 3, "type": "Cambio", "priority": 1, "status": 2, "cc_emails": ["infra@alicebiometrics.com"], "product_id": 47000002862, "custom_fields": { "cf_customer_ticket_type": "None of the above", "cf_platform": "Microservices", "cf_stage": "${{ inputs.environment }}", "cf_tipo_de_cambio257820": "Minor", "cf_urgencia": "Low", "cf_impacto": "Low"} }' 'https://alicebiometrics.freshdesk.com/api/v2/tickets'
+          curl --silent -u ${{ secrets.FRESHDESK_API_KEY }} -H "Content-Type: application/json" -X POST -d '{ "description": "New alice-biometrics/*${{inputs.chart}}* version *(${{ inputs.version }})* has been deployed", "subject": "[${{inputs.chart}}] - Deployed - ${{inputs.environment}} - Version ${{inputs.version}}", "email": "infra@alicebiometrics.com", "source": 3, "type": "Cambio", "priority": 1, "status": 2, "cc_emails": ["infra@alicebiometrics.com"], "product_id": 47000002862, "custom_fields": { "cf_customer_ticket_type": "None of the above", "cf_platform": "Microservices", "cf_stage": "${{ inputs.environment }}", "cf_tipo_de_cambio257820": "Minor", "cf_urgencia": "Low", "cf_impacto": "Low"} }' 'https://alicebiometrics.freshdesk.com/api/v2/tickets'
 
       - name: Update & Close Change
         run: |
