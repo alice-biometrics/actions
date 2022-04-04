@@ -3,18 +3,15 @@ name: Create Change
 on:
   workflow_call:
     inputs:
-      chart:
+      description:
         required: true
         type: string
-        description: Chart Deployed
+      subject:
+        required: true
+        type: string
       environment:
         required: true
         type: string
-        description: Environment used for Deploy
-      version:
-        required: true
-        type: string
-        description: Image Version Deployed
     secrets:
       freshdesk_api_key:
         required: false
