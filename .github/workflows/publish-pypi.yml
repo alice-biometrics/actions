@@ -36,7 +36,7 @@ jobs:
         with:
           python-version: '3.x'
       - name: Update VERSION file
-        run: echo -ne ${{ PACKAGE_VERSION }} > ${PACKAGE_NAME}/VERSION
+        run: echo -ne ${PACKAGE_VERSION} > ${PACKAGE_NAME}/VERSION
       - name: Install dependencies
         run: pip install setuptools wheel twine
       - name: Build and publish
@@ -49,7 +49,7 @@ jobs:
         run: |
           git config --global user.email "dev@alicebiometrics.com"
           git config --global user.name "Alice Biometrics"
-          git commit -m "Update version to ${{ PACKAGE_VERSION }}"
+          git commit -m "Update version to ${PACKAGE_VERSION}"
       - name: Push changes
         uses: alice-biometrics/github-push-action@master
         with:
