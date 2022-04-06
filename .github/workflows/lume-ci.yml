@@ -106,7 +106,12 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-
+      
+      - name: Set PYPI_JFROG configuration
+        run: |
+          mkdir -p ~/.pip
+          echo ${{ secrets.PYPI_JFROG_CONF }} | base64 --decode > ~/.pip/pip.conf
+          
       - name: Lume
         working-directory: ${{inputs.working_directory}}
         run: |
