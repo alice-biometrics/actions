@@ -460,25 +460,6 @@ This action publish a python package to PyPI registry.
 | `github_access_token` | _required_  | Required to upload the VERSION FILE                             | 
 
 
-
-
-
-
-Example to get this output:
-
-```yml
-set-global:
-uses: alice-biometrics/actions/.github/workflows/set-global.yml@main
-with:
-  value: My Global Value
-print-version:
-    needs: set-global
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print Version
-        run: echo "Global: ${{ needs.set-global.value }}"
-```
-
 ## Contact :mailbox_with_mail:
 
 support@alicebiometrics.com
