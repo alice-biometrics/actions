@@ -20,11 +20,11 @@ on:
         required: false
 
 env:
-  PACKAGE_NAME: ${{ inputs.package_name}}
-  PACKAGE_VERSION: ${{ inputs.version}}
-  TWINE_USERNAME: ${{ secrets.username}}
-  TWINE_PASSWORD: ${{ secrets.password}}
-  GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token}}
+  PACKAGE_NAME: ${{ inputs.package_name }}
+  PACKAGE_VERSION: ${{ inputs.version }}
+  TWINE_USERNAME: ${{ secrets.username }}
+  TWINE_PASSWORD: ${{ secrets.password }}
+  GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token }}
 
 jobs:
   publish-pypi:
@@ -53,7 +53,7 @@ jobs:
       - name: Push changes
         uses: alice-biometrics/github-push-action@master
         with:
-          github_token: ${{ GITHUB_ACCESS_TOKEN }}
+          github_token: ${GITHUB_ACCESS_TOKEN}
           branch: main
       - name: Check pip installation
         run: |
