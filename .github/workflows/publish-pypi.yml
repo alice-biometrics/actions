@@ -1,0 +1,62 @@
+name: Publish to PyPI
+
+on:
+  workflow_call:
+    inputs:
+      package_name:
+        required: true
+        type: string
+        description: Name of the package to upload
+      version:
+        required: true
+        type: string
+        description: Version of the package to upload
+    secrets:
+      username:
+        required: false
+      password:
+        required: false
+      github_access_token:
+        required: false
+
+env:
+  PACKAGE_NAME: ${{ inputs.package_name}}
+  PACKAGE_VERSION: ${{ inputs.version}}
+  TWINE_USERNAME: ${{ secrets.username}}
+  TWINE_PASSWORD: ${{ secrets.password}}
+  GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token}}
+
+jobs:
+  publish-pypi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Update VERSION file
+        run: echo -ne ${{ PACKAGE_VERSION }} > ${PACKAGE_NAME}/VERSION
+      - name: Install dependencies
+        run: pip install setuptools wheel twine
+      - name: Build and publish
+        run: |
+          python setup.py sdist bdist_wheel
+          twine upload dist/*
+      - name: Git - Add VERSION File
+        run: git add ${PACKAGE_NAME}/VERSION
+      - name: Git - Commit VERSION File
+        run: |
+          git config --global user.email "dev@alicebiometrics.com"
+          git config --global user.name "Alice Biometrics"
+          git commit -m "Update version to ${{ PACKAGE_VERSION }}"
+      - name: Push changes
+        uses: alice-biometrics/github-push-action@master
+        with:
+          github_token: ${{ GITHUB_ACCESS_TOKEN }}
+          branch: main
+      - name: Check pip installation
+        run: |
+          pip install ${PACKAGE_NAME}==${{ needs.get-version.outputs.version }} || true
+          pip install ${PACKAGE_NAME}==${{ needs.get-version.outputs.version }}
+
