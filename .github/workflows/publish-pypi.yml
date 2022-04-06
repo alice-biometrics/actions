@@ -28,6 +28,7 @@ env:
 
 jobs:
   publish-pypi:
+    name: Publish to PyPI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -57,6 +58,6 @@ jobs:
           branch: main
       - name: Check pip installation
         run: |
-          pip install ${PACKAGE_NAME}==${{ needs.get-version.outputs.version }} || true
-          pip install ${PACKAGE_NAME}==${{ needs.get-version.outputs.version }}
+          pip install ${PACKAGE_NAME}==${PACKAGE_VERSION} || true
+          pip install ${PACKAGE_NAME}==${PACKAGE_VERSION}
 
