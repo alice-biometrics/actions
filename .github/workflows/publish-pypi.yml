@@ -64,6 +64,7 @@ jobs:
           github_token: ${GITHUB_ACCESS_TOKEN}
           branch: main
       - name: Check pip installation
+        if: "${{ env.REPOSITORY_URL == '' }}"
         run: |
           pip install ${PACKAGE_NAME}==${PACKAGE_VERSION} || true
           pip install ${PACKAGE_NAME}==${PACKAGE_VERSION}
