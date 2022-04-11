@@ -69,8 +69,14 @@ jobs:
           service_account_key: ${{ secrets.gke_key }}
           export_default_credentials: true
 
-      - name: Setup Python
-        if: ${{ inputs.language == 'python' }}
+      - name: Setup Python (without cache)
+        if: ${{ inputs.language == 'python' && inputs.use_cache == false }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ inputs.python_version }}
+
+      - name: Setup Python (with cache)
+        if: ${{ inputs.language == 'python' && inputs.use_cache == true }}
         uses: actions/setup-python@v3
         with:
           python-version: ${{ inputs.python_version }}
