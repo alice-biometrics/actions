@@ -11,6 +11,10 @@ on:
         required: true
         type: string
         description: Version of the package to upload
+      folder:
+        required: false
+        type: string
+        description: Folder where VERSION file is going to be update (default package_name value)
     secrets:
       username:
         required: true
@@ -24,6 +28,7 @@ on:
 env:
   PACKAGE_NAME: ${{ inputs.package_name }}
   PACKAGE_VERSION: ${{ inputs.version }}
+  PACKAGE_FOLDER: ${{ inputs.folder }}
   TWINE_USERNAME: ${{ secrets.username }}
   TWINE_PASSWORD: ${{ secrets.password }}
   REPOSITORY_URL: ${{ secrets.repository_url }}
@@ -41,10 +46,14 @@ jobs:
           python-version: '3.x'
           cache: 'pip'
       - name: Check repository_url
-        if: "${{ env.REPOSITORY_URL != '' }}"
+        if: ${{ env.REPOSITORY_URL != '' }}
         run: echo "TWINE_REPOSITORY_URL=$REPOSITORY_URL" >> $GITHUB_ENV
-      - name: Update VERSION file
+      - name: Update VERSION file (default)
+        if: ${{ env.PACKAGE_FOLDER == '' }}
         run: echo -ne ${PACKAGE_VERSION} > ${PACKAGE_NAME}/VERSION
+      - name: Update VERSION file (from folder)
+        if: ${{ env.PACKAGE_FOLDER != '' }}
+        run: echo -ne ${PACKAGE_VERSION} > ${PACKAGE_FOLDER}/VERSION
       - name: Install dependencies
         run: pip install setuptools wheel twine
       - name: Build and publish
@@ -64,7 +73,7 @@ jobs:
           github_token: ${GITHUB_ACCESS_TOKEN}
           branch: main
       - name: Check pip installation
-        if: "${{ env.REPOSITORY_URL == '' }}"
+        if: ${{ env.REPOSITORY_URL == '' }}
         run: |
           pip install ${PACKAGE_NAME}==${PACKAGE_VERSION} || true
           pip install ${PACKAGE_NAME}==${PACKAGE_VERSION}

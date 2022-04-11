@@ -446,10 +446,12 @@ This action publish a python package to PyPI registry.
 
 ##### Inputs
 
-| Name           | Requirement  | Description            |
-|----------------|--------------|------------------------|
-| `package_name` | _required_   | Name of the package    |
-| `version`      | _required_   | Version of the package |
+| Name           | Requirement | Description            |
+|----------------|-------------|------------------------|
+| `package_name` | _required_  | Name of the package    |
+| `version`      | _required_  | Version of the package |
+| `folder`       | _optional_  | Folder where VERSION file is going to be update (default package_name value) |
+
 
 ##### Secrets
 
