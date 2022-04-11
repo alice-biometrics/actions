@@ -60,8 +60,12 @@ jobs:
         run: |
           python setup.py sdist bdist_wheel
           twine upload dist/*
-      - name: Git - Add VERSION File
+      - name: Git - Add VERSION File (default)
+        if: ${{ env.PACKAGE_FOLDER == '' }}
         run: git add ${PACKAGE_NAME}/VERSION
+      - name: Git - Add VERSION File (from folder)
+        if: ${{ env.PACKAGE_FOLDER != '' }}
+        run: git add ${PACKAGE_FOLDER}/VERSION
       - name: Git - Commit VERSION File
         run: |
           git config --global user.email "dev@alicebiometrics.com"
