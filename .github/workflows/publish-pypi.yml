@@ -26,6 +26,7 @@ env:
   PACKAGE_VERSION: ${{ inputs.version }}
   TWINE_USERNAME: ${{ secrets.username }}
   TWINE_PASSWORD: ${{ secrets.password }}
+  REPOSITORY_URL: ${{ secrets.repository_url }}
   GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token }}
 
 jobs:
@@ -40,8 +41,8 @@ jobs:
           python-version: '3.x'
           cache: 'pip'
       - name: Check repository_url
-        if: "${{ secret.repository_url != '' }}"
-        run: echo "TWINE_REPOSITORY_URL=${{ secrets.repository_url }}" >> $GITHUB_ENV
+        if: "${{ env.REPOSITORY_URL != '' }}"
+        run: echo "TWINE_REPOSITORY_URL=$REPOSITORY_URL" >> $GITHUB_ENV
       - name: Update VERSION file
         run: echo -ne ${PACKAGE_VERSION} > ${PACKAGE_NAME}/VERSION
       - name: Install dependencies
