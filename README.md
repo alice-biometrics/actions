@@ -457,6 +457,7 @@ This action publish a python package to PyPI registry.
 |-----------------------|-------------|-----------------------------------------------------------------|
 | `username`            | _required_  | Username (We use Twine, so default value should be `__token__`) |
 | `password`            | _required_  | Password/Token (We use Twine)                                   |
+| `repository_url`      | _optional_  | URL of PyPI artifactory repo (We use Twine)                     |
 | `github_access_token` | _required_  | Required to upload the VERSION FILE                             | 
 
 
