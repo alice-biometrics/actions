@@ -427,6 +427,41 @@ print-version:
         run: echo "Global: ${{ needs.set-global.value }}"
 ```
 
+### Publish to PyPI <img src="https://github.com/alice-biometrics/custom-emojis/blob/master/images/python.png" width="16">
+
+This action publish a python package to PyPI registry.
+
+*Example:*
+```yml
+   publish-pypi:
+    uses: alice-biometrics/actions/.github/workflows/publish-pypi.yml@main
+    with:
+      package_name: my_package
+      version: 1.0.0
+    secrets:
+      username: __token__
+      password: pypi-********************
+      github_access_token: ${{ secrets.MY_GITHUB_ACCESS_TOKEN }}
+```
+
+##### Inputs
+
+| Name           | Requirement | Description            |
+|----------------|-------------|------------------------|
+| `package_name` | _required_  | Name of the package    |
+| `version`      | _required_  | Version of the package |
+| `folder`       | _optional_  | Folder where VERSION file is going to be update (default package_name value) |
+
+
+##### Secrets
+
+| Name                  | Requirement | Description                                                     |
+|-----------------------|-------------|-----------------------------------------------------------------|
+| `username`            | _required_  | Username (We use Twine, so default value should be `__token__`) |
+| `password`            | _required_  | Password/Token (We use Twine)                                   |
+| `repository_url`      | _optional_  | URL of PyPI artifactory repo (We use Twine)                     |
+| `github_access_token` | _required_  | Required to upload the VERSION FILE                             | 
+
 
 ## Contact :mailbox_with_mail:
 

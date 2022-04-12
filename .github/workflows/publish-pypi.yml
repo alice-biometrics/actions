@@ -1,0 +1,84 @@
+name: Publish to PyPI
+
+on:
+  workflow_call:
+    inputs:
+      package_name:
+        required: true
+        type: string
+        description: Name of the package to upload
+      version:
+        required: true
+        type: string
+        description: Version of the package to upload
+      folder:
+        required: false
+        type: string
+        description: Folder where VERSION file is going to be update (default package_name value)
+    secrets:
+      username:
+        required: true
+      password:
+        required: true
+      repository_url:
+        required: false
+      github_access_token:
+        required: true
+
+env:
+  PACKAGE_NAME: ${{ inputs.package_name }}
+  PACKAGE_VERSION: ${{ inputs.version }}
+  PACKAGE_FOLDER: ${{ inputs.folder }}
+  TWINE_USERNAME: ${{ secrets.username }}
+  TWINE_PASSWORD: ${{ secrets.password }}
+  REPOSITORY_URL: ${{ secrets.repository_url }}
+  GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token }}
+
+jobs:
+  publish-pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+      - name: Check repository_url
+        if: ${{ env.REPOSITORY_URL != '' }}
+        run: echo "TWINE_REPOSITORY_URL=$REPOSITORY_URL" >> $GITHUB_ENV
+      - name: Update VERSION file (default)
+        if: ${{ env.PACKAGE_FOLDER == '' }}
+        run: echo -ne ${PACKAGE_VERSION} > ${PACKAGE_NAME}/VERSION
+      - name: Update VERSION file (from folder)
+        if: ${{ env.PACKAGE_FOLDER != '' }}
+        run: echo -ne ${PACKAGE_VERSION} > ${PACKAGE_FOLDER}/VERSION
+      - name: Install dependencies
+        run: pip install setuptools wheel twine
+      - name: Build and publish
+        run: |
+          python setup.py sdist bdist_wheel
+          twine upload dist/*
+      - name: Git - Add VERSION File (default)
+        if: ${{ env.PACKAGE_FOLDER == '' }}
+        run: git add ${PACKAGE_NAME}/VERSION
+      - name: Git - Add VERSION File (from folder)
+        if: ${{ env.PACKAGE_FOLDER != '' }}
+        run: git add ${PACKAGE_FOLDER}/VERSION
+      - name: Git - Commit VERSION File
+        run: |
+          git config --global user.email "dev@alicebiometrics.com"
+          git config --global user.name "Alice Biometrics"
+          git commit -m "Update version to ${PACKAGE_VERSION}"
+      - name: Push changes
+        uses: alice-biometrics/github-push-action@master
+        with:
+          github_token: ${GITHUB_ACCESS_TOKEN}
+          branch: main
+      - name: Check pip installation
+        if: ${{ env.REPOSITORY_URL == '' }}
+        run: |
+          pip install ${PACKAGE_NAME}==${PACKAGE_VERSION} || true
+          pip install ${PACKAGE_NAME}==${PACKAGE_VERSION}
+
