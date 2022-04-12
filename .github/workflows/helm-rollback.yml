@@ -45,7 +45,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v0
 
       - name: Set Repo Alice Biometrics
-        run: helm repo add alice-biometrics --username "${{ github_access_token }}" --password "{{ github_access_token }}" "https://raw.githubusercontent.com/alice-biometrics/helm-chart-repository/main/"
+        run: helm repo add alice-biometrics --username "${{ secrets.github_access_token }}" --password "{{ secrets.github_access_token }}" "https://raw.githubusercontent.com/alice-biometrics/helm-chart-repository/main/"
 
       - name: Rollback Helm Deploy
         id: helm-rollback

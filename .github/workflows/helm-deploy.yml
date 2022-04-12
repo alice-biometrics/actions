@@ -97,7 +97,7 @@ jobs:
           helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml ${{inputs.helm_deploy_args}} --namespace ${{inputs.environment}}
 
       - name: Set Repo Alice Biometrics  
-        run: helm repo add alice-biometrics --username "${{ github_access_token }}" --password "{{ github_access_token }}" "https://raw.githubusercontent.com/alice-biometrics/helm-chart-repository/main/"
+        run: helm repo add alice-biometrics --username "${{ secrets.github_access_token }}" --password "{{ secrets.github_access_token }}" "https://raw.githubusercontent.com/alice-biometrics/helm-chart-repository/main/"
 
       - name: Helm Repository Checkout
         if: ${{ steps.helm-deploy.outcome == 'success' }}      
@@ -138,7 +138,7 @@ jobs:
         run: |
           cd helm-chart-repository
           helm pull --untar alice-biometrics/${{inputs.chart}}        
-          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/ -f ${{inputs.chart}}/values-${{inputs.environment}}.yaml.old ${{inputs.helm_deploy_args}} --namespace ${{inputs.environment}}        
+          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/ -f ${{inputs.chart}}/values-${{inputs.environment}}.yaml ${{inputs.helm_deploy_args}} --namespace ${{inputs.environment}}
           echo "::error ::Failure on Helm Deploy"
 
       - name: Commit changes
