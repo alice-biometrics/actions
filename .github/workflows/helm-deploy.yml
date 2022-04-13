@@ -81,6 +81,7 @@ jobs:
       - name: Chart Helm Deploy
         if: ${{ inputs.test_deploy }}
         run: helm install ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
+      
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v0
         with:
@@ -88,16 +89,56 @@ jobs:
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
+
       - name: Helm Deploy
         id: helm-deploy
         run: |
           gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
           helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml ${{inputs.helm_deploy_args}} --namespace ${{inputs.environment}}
 
+      - name: Set Repo Alice Biometrics  
+        run: helm repo add alice-biometrics --username "${{ secrets.github_access_token }}" --password "${{ secrets.github_access_token }}" "https://raw.githubusercontent.com/alice-biometrics/helm-chart-repository/main/"
+
+      - name: Helm Repository Checkout
+        if: ${{ steps.helm-deploy.outcome == 'success' }}      
+        uses: actions/checkout@v2
+        with:
+          repository: alice-biometrics/helm-chart-repository
+          token: ${{ secrets.github_access_token }}
+          fetch-depth: 0
+          persist-credentials: true
+          ref: main
+          path: helm-chart-repository  
+
+      - name: Helm Package
+        if: ${{ steps.helm-deploy.outcome == 'success' }}           
+        run: |
+          sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/' ${{inputs.chart}}/chart/Chart.yaml
+          helm package ${{inputs.chart}}/chart --version "${{inputs.version}}" -d helm-chart-repository
+
+      - name: Helm Push
+        if: ${{ steps.helm-deploy.outcome == 'success' }}    
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_access_token }}
+        run: |
+          git config --global user.email "dev@alicebiometrics.com"
+          git config --global user.name "Alice Biometrics"
+          CHART_PACKAGE_NAME="${{inputs.chart}}-${{inputs.version}}.tgz"
+          cd helm-chart-repository
+          if [ ${{inputs.environment }} == 'production' ] ; then
+            find . -name "${{inputs.chart}}-${{inputs.version}}+*" -exec rm -rf {} \;
+            git add -u
+          fi
+          git add "$CHART_PACKAGE_NAME"
+          git commit -m "$CHART_PACKAGE_NAME"
+          git push origin main          
+
       - name: Rollback Helm Deploy
         if:  ${{ steps.helm-deploy.outcome == 'failure' }}
         run: |
-          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old ${{inputs.helm_deploy_args}} --namespace ${{inputs.environment}}        
+          cd helm-chart-repository
+          helm pull --untar alice-biometrics/${{inputs.chart}}        
+          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/ -f ${{inputs.chart}}/values-${{inputs.environment}}.yaml ${{inputs.helm_deploy_args}} --namespace ${{inputs.environment}}
           echo "::error ::Failure on Helm Deploy"
 
       - name: Commit changes
@@ -105,8 +146,10 @@ jobs:
         working-directory: ${{inputs.chart}}/chart
         run: |
           git pull
-          git add values-${{inputs.environment}}.yaml.old
+          sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/' Chart.yaml
+          helm package .
           git add values-${{inputs.environment}}.yaml
+          git add Chart.yaml          
           git config --global user.email "dev@alicebiometrics.com"
           git config --global user.name "Alice Biometrics"
           git commit -m "ENH. ${{inputs.chart}}. Update image to ${{inputs.version}} (${{inputs.environment}})"
