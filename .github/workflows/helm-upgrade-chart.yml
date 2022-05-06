@@ -42,8 +42,7 @@ jobs:
           repository: alice-biometrics/alice-k8s-cloud
           token: ${{ secrets.github_access_token}}   
    
-      - name: Helm Repository Checkout
-        if: ${{ steps.helm-deploy.outcome == 'success' }}      
+      - name: Helm Repository Checkout    
         uses: actions/checkout@v2
         with:
           repository: alice-biometrics/helm-chart-repository
@@ -54,7 +53,6 @@ jobs:
           path: helm-chart-repository  
 
       - name: Helm Package
-        if: ${{ steps.helm-deploy.outcome == 'success' }}           
         run: |
           sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/' ${{inputs.chart}}/chart/Chart.yaml
           helm package ${{inputs.chart}}/chart --version "${{inputs.version}}" -d helm-chart-repository
