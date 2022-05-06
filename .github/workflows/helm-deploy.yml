@@ -137,7 +137,7 @@ jobs:
         if:  ${{ steps.helm-deploy.outcome == 'failure' }}
         run: |
           cd helm-chart-repository
-          helm pull --untar alice-biometrics/${{inputs.chart}}        
+          helm pull --devel --untar alice-biometrics/${{inputs.chart}}        
           helm upgrade ${{inputs.chart}} ${{inputs.chart}}/ -f ${{inputs.chart}}/values-${{inputs.environment}}.yaml ${{inputs.helm_deploy_args}} --namespace ${{inputs.environment}}
           echo "::error ::Failure on Helm Deploy"
 

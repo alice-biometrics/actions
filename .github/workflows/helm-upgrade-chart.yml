@@ -1,0 +1,76 @@
+name: Helm Ugrade Chart
+
+on:
+  workflow_call:
+    inputs:
+      chart:
+        required: true
+        type: string
+        description: Chart to update and then deploy.
+      environment:
+        required: true
+        type: string
+        description: Environment to deploy
+      version:
+        required: true
+        type: string
+        description: Image Version to deploy
+    secrets:
+      github_access_token:
+        required: false
+      gke_key:
+        required: true
+      gke_project:
+        required: true
+      gke_zone:
+        required: true 
+      gke_cluster_prefix:
+        required: true
+
+jobs:
+  helm-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.4.0
+
+      - name: Alice k8s Cloud Repository Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: alice-biometrics/alice-k8s-cloud
+          token: ${{ secrets.github_access_token}}   
+   
+      - name: Helm Repository Checkout
+        if: ${{ steps.helm-deploy.outcome == 'success' }}      
+        uses: actions/checkout@v2
+        with:
+          repository: alice-biometrics/helm-chart-repository
+          token: ${{ secrets.github_access_token }}
+          fetch-depth: 0
+          persist-credentials: true
+          ref: main
+          path: helm-chart-repository  
+
+      - name: Helm Package
+        if: ${{ steps.helm-deploy.outcome == 'success' }}           
+        run: |
+          sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/' ${{inputs.chart}}/chart/Chart.yaml
+          helm package ${{inputs.chart}}/chart --version "${{inputs.version}}" -d helm-chart-repository
+
+      - name: Helm Push
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_access_token }}
+        run: |
+          git config --global user.email "dev@alicebiometrics.com"
+          git config --global user.name "Alice Biometrics"
+          CHART_PACKAGE_NAME="${{inputs.chart}}-${{inputs.version}}.tgz"
+          cd helm-chart-repository
+          if [ ${{inputs.environment }} == 'production' ] ; then
+            find . -name "${{inputs.chart}}-${{inputs.version}}+*" -exec rm -rf {} \;
+            git add -u
+          fi
+          git add "$CHART_PACKAGE_NAME"
+          git commit -m "$CHART_PACKAGE_NAME"
+          git push origin main

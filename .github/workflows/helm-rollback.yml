@@ -51,7 +51,7 @@ jobs:
         id: helm-rollback
         run: |
           gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
-          helm pull --untar alice-biometrics/${{inputs.chart}}
+          helm pull --devel --untar alice-biometrics/${{inputs.chart}}
           helm upgrade ${{inputs.chart}} ${{inputs.chart}}/ -f ${{inputs.chart}}/values-${{inputs.environment}}.yaml --install --wait --atomic --namespace ${{inputs.environment}} 
 
       - name: Restore Reference Docker Image
