@@ -31,7 +31,7 @@ jobs:
     - name: Set VERSION (commit)
       if: ${{ env.TYPE == 'commit' }}
       run: |
-      echo ${{github}}
+      echo "${{github}}"
       echo "VERSION=${TAG:1}-alpha.$(echo ${{github.run_attempt}})+$(echo ${GITHUB_SHA:0:8})" >> $GITHUB_ENV
     - name: Set VERSION (release)
       if: ${{ env.TYPE == 'release' }}
