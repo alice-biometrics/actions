@@ -30,7 +30,7 @@ jobs:
         echo "TAG=$(echo $(git describe --tags $(git rev-list --tags --max-count=1)))" >> $GITHUB_ENV
     - name: Set VERSION (commit)
       if: ${{ env.TYPE == 'commit' }}
-      run: echo "VERSION=${TAG:1}-$(echo ${GITHUB_SHA:0:8})" >> $GITHUB_ENV
+      run: echo "VERSION=${TAG:1}-alpha.$(echo ${github.run_attempt})+$(echo ${GITHUB_SHA:0:8})" >> $GITHUB_ENV
     - name: Set VERSION (release)
       if: ${{ env.TYPE == 'release' }}
       run: echo "VERSION=$(echo ${GITHUB_REF:11})" >> $GITHUB_ENV
