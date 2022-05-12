@@ -53,25 +53,3 @@ jobs:
           gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
           helm pull --devel --untar alice-biometrics/${{inputs.chart}}
           helm upgrade ${{inputs.chart}} ${{inputs.chart}}/ -f ${{inputs.chart}}/values-${{inputs.environment}}.yaml --install --wait --atomic --namespace ${{inputs.environment}} 
-
-      - name: Restore Reference Docker Image
-        if: ${{ steps.helm-rollback.outcome == 'failure' }}
-        run: |
-          echo "::error ::${{inputs.chart}} (${{inputs.environment}}): Please review your configuration (${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml"
-
-      - name: Purge old Reference Image
-        if: ${{ steps.helm-rollback.outcome == 'success' }}
-        run: |
-          git pull
-          cp ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml
-          rm ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old
-          git config --global user.email "dev@alicebiometrics.com"
-          git config --global user.name "Alice Biometrics"          
-          git add -u
-          git commit -m "${{inputs.chart}} (${{inputs.environment}}): Remove old chart (${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old)"
-
-      - name: Push changes
-        uses: alice-biometrics/github-push-action@master
-        with:
-          github_token: ${{ secrets.github_access_token}} 
-          repository: alice-biometrics/alice-k8s-cloud
