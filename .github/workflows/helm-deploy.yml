@@ -56,7 +56,6 @@ jobs:
         working-directory: ${{inputs.chart}}/chart
         run: |
           echo "Updating docker image on chart ${{inputs.chart}} (environment: ${{inputs.environment}}) to ${{inputs.version}}"
-          cp values-${{inputs.environment}}.yaml values-${{inputs.environment}}.yaml.old
           sed -ri 's/^(\s*)(tag:.*$)/\1tag: ${{inputs.version}}/' values-${{inputs.environment}}.yaml
 
       - name: Chart Helm Linter
