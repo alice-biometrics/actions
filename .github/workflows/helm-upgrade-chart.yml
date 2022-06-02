@@ -61,6 +61,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.github_access_token }}
         run: |
+          git pull origin
           git config --global user.email "dev@alicebiometrics.com"
           git config --global user.name "Alice Biometrics"
           CHART_PACKAGE_NAME="${{inputs.chart}}-${{inputs.version}}.tgz"
