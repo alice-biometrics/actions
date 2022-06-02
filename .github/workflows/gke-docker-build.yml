@@ -52,6 +52,8 @@ on:
         required: true
       github_access_token:
         required: false
+      github_packages_npm_token:
+        required: false
 
 env:
   TAG: ${{ inputs.tag }}
@@ -59,6 +61,7 @@ env:
   REGISTRY: eu.gcr.io/${{ secrets.gke_project}}
   IMAGE: eu.gcr.io/${{ secrets.gke_project}}/${{ inputs.image }}
   GITHUB_ACCESS_TOKEN: ${{ secrets.github_access_token}}
+  GITHUB_PACKAGES_NPM_TOKEN:  ${{ secrets.github_packages_npm_token }}
 
 jobs:
   gke-docker-build:
@@ -112,7 +115,7 @@ jobs:
         continue-on-error: true
 
       - name: Docker Build
-        if:  ${{ env.GITHUB_ACCESS_TOKEN == '' && steps.check-build-status.outputs.result == 'not_exist' }}
+        if:  ${{ env.GITHUB_ACCESS_TOKEN == '' && env.GITHUB_PACKAGES_NPM_TOKEN == '' && steps.check-build-status.outputs.result == 'not_exist' }}
         working-directory: ${{inputs.working_directory}}
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE})"
@@ -123,13 +126,26 @@ jobs:
           --build-arg IMAGE=${IMAGE} .
           echo "::debug ::Docker image is tagged with ${IMAGE}:${TAG}"
 
+      - name: Docker Build with GITHUB_PACKAGES_NPM_TOKEN
+        if:  ${{ env.GITHUB_ACCESS_TOKEN == '' && env.GITHUB_PACKAGES_NPM_TOKEN != '' && steps.check-build-status.outputs.result == 'not_exist' }}
+        working-directory: ${{inputs.working_directory}}
+        run: |
+          echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE})"
+          DOCKER_BUILDKIT=1 docker build -t ${IMAGE}:${TAG} -f ${PWD}/${DOCKERFILE} \
+          --build-arg REGISTRY=${REGISTRY} \
+          --build-arg TAG=${TAG} \
+          --build-arg GITHUB_PACKAGES_NPM_TOKEN=${{ env.GITHUB_PACKAGES_NPM_TOKEN}} \
+          --build-arg BUILD_TIMESTAMP="${{steps.update_version_and_deploy_files.outputs.build_timestamp}}" \
+          --build-arg IMAGE=${IMAGE} .
+          echo "::debug ::Docker image is tagged with ${IMAGE}:${TAG}"
+
       - name: Pre-Build
         if: ${{ inputs.pre_build != '' }}
         working-directory: ${{inputs.working_directory}}
         run: ${{ inputs.pre_build }}
 
       - name: Docker Build With GITHUB_ACCESS_TOKEN
-        if:  ${{ env.GITHUB_ACCESS_TOKEN != '' && steps.check-build-status.outputs.result == 'not_exist'}}
+        if:  ${{ env.GITHUB_ACCESS_TOKEN != '' && env.GITHUB_PACKAGES_NPM_TOKEN == '' && steps.check-build-status.outputs.result == 'not_exist'}}
         working-directory: ${{inputs.working_directory}}
         run: |
           echo "Building docker image ${IMAGE} (${TAG}) from Dockerfile (${DOCKERFILE}) with GITHUB_ACCESS_TOKEN"
