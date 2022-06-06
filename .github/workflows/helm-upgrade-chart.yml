@@ -68,8 +68,11 @@ jobs:
           cd helm-chart-repository
           if [ ${{inputs.environment }} == 'production' ] ; then
             find . -name "${{inputs.chart}}-${{inputs.version}}+*" -exec rm -rf {} \;
-            git add -u
           fi
-          git add "$CHART_PACKAGE_NAME"
-          git commit -m "$CHART_PACKAGE_NAME"
-          git push origin main
+          if [[ -z $(git status -s) ]]
+          then
+            git add -u
+            git add "$CHART_PACKAGE_NAME"
+            git commit -m "$CHART_PACKAGE_NAME"
+            git push origin main
+          fi

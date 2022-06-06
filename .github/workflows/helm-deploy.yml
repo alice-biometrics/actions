@@ -107,20 +107,27 @@ jobs:
           echo "::error ::Failure on Helm Deploy"
 
       - name: Commit changes
+        id: commit_changes
         if: ${{ steps.helm-deploy.outcome == 'success' }}
         working-directory: ${{inputs.chart}}/chart
         run: |
           git pull
           sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/' Chart.yaml
-          helm package .
-          git add values-${{inputs.environment}}.yaml
-          git add Chart.yaml          
-          git config --global user.email "dev@alicebiometrics.com"
-          git config --global user.name "Alice Biometrics"
-          git commit -m "ENH. ${{inputs.chart}}. Update image to ${{inputs.version}} (${{inputs.environment}})"
+          if [[ -z $(git status -s) ]]
+          then
+            git add values-${{inputs.environment}}.yaml
+            git add Chart.yaml          
+            git config --global user.email "dev@alicebiometrics.com"
+            git config --global user.name "Alice Biometrics"
+            git commit -m "feat(${{inputs.chart}}): update image to ${{inputs.version}} (${{inputs.environment}})"
+            echo "::set-output name=push_required::true"
+          else
+            echo "::set-output name=push_required::false"
+          fi
 
       - name: Push changes
         uses: alice-biometrics/github-push-action@master
+        if: ${{ steps.commit_changes.output.push_required == "true" }}
         with:
           github_token: ${{ secrets.github_access_token}} 
           repository: alice-biometrics/alice-k8s-cloud
