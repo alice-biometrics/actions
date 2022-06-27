@@ -113,6 +113,7 @@ jobs:
         run: |
           git pull
           sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/' Chart.yaml
+          git status
           if [[ -n $(git status -s) ]]
           then
             git add values-${{inputs.environment}}.yaml
@@ -120,8 +121,10 @@ jobs:
             git config --global user.email "dev@alicebiometrics.com"
             git config --global user.name "Alice Biometrics"
             git commit -m "feat(${{inputs.chart}}): update image to ${{inputs.version}} (${{inputs.environment}})"
+            echo "There are changes to push to the remote repository"
             echo "::set-output name=push_required::true"
           else
+            echo "There are no changes to push to the remote repository"
             echo "::set-output name=push_required::false"
           fi
 
