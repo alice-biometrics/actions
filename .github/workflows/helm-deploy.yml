@@ -130,7 +130,7 @@ jobs:
 
       - name: Push changes
         uses: alice-biometrics/github-push-action@master
-        if: ${{ steps.commit_changes.output.push_required == 'true' }}
+        if: ${{ steps.commit_changes.outputs.push_required == 'true' }}
         with:
           github_token: ${{ secrets.github_access_token}} 
           repository: alice-biometrics/alice-k8s-cloud
