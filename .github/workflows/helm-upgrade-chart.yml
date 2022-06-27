@@ -69,7 +69,7 @@ jobs:
           if [ ${{inputs.environment }} == 'production' ] ; then
             find . -name "${{inputs.chart}}-${{inputs.version}}+*" -exec rm -rf {} \;
           fi
-          if [[ -z $(git status -s) ]]
+          if [[ -n $(git status -s) ]]
           then
             git add -u
             git add "$CHART_PACKAGE_NAME"
