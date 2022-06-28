@@ -53,11 +53,20 @@ jobs:
           path: helm-chart-repository  
 
       - name: Helm Package
+        id: helm_package
         run: |
-          sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/' ${{inputs.chart}}/chart/Chart.yaml
-          helm package ${{inputs.chart}}/chart --version "${{inputs.version}}" -d helm-chart-repository
+          sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/w changelog.txt' ${{inputs.chart}}/chart/Chart.yaml
+          if [ -s changelog.txt ]; then
+            echo "Version has changed"
+            helm package ${{inputs.chart}}/chart --version "${{inputs.version}}" -d helm-chart-repository
+            echo "::set-output name=push_required::true"
+          else
+            echo "Version has not changed"
+            echo "::set-output name=push_required::false"
+          fi      
 
       - name: Helm Push
+        if: ${{ steps.helm_package.outputs.push_required == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.github_access_token }}
         run: |
