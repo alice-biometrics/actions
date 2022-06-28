@@ -55,7 +55,7 @@ jobs:
       - name: Helm Package
         id: helm_package
         run: |
-          if [ grep -q ${{inputs.version}}  ${{inputs.chart}}/chart/Chart.yaml ]; then
+          if grep -q ${{inputs.version}}  ${{inputs.chart}}/chart/Chart.yaml; then
             echo "Version has not changed"
             echo "::set-output name=push_required::false"
           else
