@@ -55,16 +55,16 @@ jobs:
       - name: Helm Package
         id: helm_package
         run: |
-          sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/w changelog.txt' ${{inputs.chart}}/chart/Chart.yaml
-          if [ -s changelog.txt ]; then
-            echo "Version has changed"
-            helm package ${{inputs.chart}}/chart --version "${{inputs.version}}" -d helm-chart-repository
-            echo "::set-output name=push_required::true"
-          else
+          if [ grep -q ${{inputs.version}}  ${{inputs.chart}}/chart/Chart.yaml ]; then
             echo "Version has not changed"
             echo "::set-output name=push_required::false"
-          fi      
-
+          else
+            echo "Version has changed"
+            sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/' ${{inputs.chart}}/chart/Chart.yaml
+            helm package ${{inputs.chart}}/chart --version "${{inputs.version}}" -d helm-chart-repository
+            echo "::set-output name=push_required::true"
+          fi   
+        
       - name: Helm Push
         if: ${{ steps.helm_package.outputs.push_required == 'true' }}
         env:
