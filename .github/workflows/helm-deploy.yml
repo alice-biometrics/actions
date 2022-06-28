@@ -114,7 +114,7 @@ jobs:
           git pull
           sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/' Chart.yaml
           git status
-          if [[ -n $(git status -s) ]]
+          if [[ -n $(git status -s -uno) ]]
           then
             git add values-${{inputs.environment}}.yaml
             git add Chart.yaml          
