@@ -132,5 +132,6 @@ jobs:
         uses: alice-biometrics/github-push-action@master
         if: ${{ steps.commit_changes.outputs.push_required == 'true' }}
         with:
+          pull_first: true
           github_token: ${{ secrets.github_access_token}} 
           repository: alice-biometrics/alice-k8s-cloud
