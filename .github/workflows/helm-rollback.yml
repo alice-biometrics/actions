@@ -29,26 +29,36 @@ jobs:
         uses: azure/setup-helm@v1
         with:
           version: v3.4.0
+
       - name: Checkout Helm Chart Repo
         uses: actions/checkout@v2
         with:
-          repository: alice-biometrics/alice-k8s-cloud
+          repository: alice-biometrics/helm-chart-repository
           token: ${{ secrets.github_access_token}}
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v0
         with:
           credentials_json: ${{ secrets.gke_key }}
+
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
+
+      - name: Set Repo Alice Biometrics
+        run: helm repo add alice-biometrics --username "${{ secrets.github_access_token }}" --password "${{ secrets.github_access_token }}" "https://raw.githubusercontent.com/alice-biometrics/helm-chart-repository/main/"
+
       - name: Rollback Helm Deploy
         id: helm-rollback
         run: |
           gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}}-${{inputs.environment}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
-          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/chart/ -f ${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old --install --wait --atomic --namespace ${{inputs.environment}}        
+          helm pull --untar alice-biometrics/${{inputs.chart}}
+          helm upgrade ${{inputs.chart}} ${{inputs.chart}}/ -f ${{inputs.chart}}/values-${{inputs.environment}}.yaml --install --wait --atomic --namespace ${{inputs.environment}} 
+
       - name: Restore Reference Docker Image
         if: ${{ steps.helm-rollback.outcome == 'failure' }}
         run: |
-          echo "::error ::${{inputs.chart}} (${{inputs.environment}}): Please review old chart (${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old"
+          echo "::error ::${{inputs.chart}} (${{inputs.environment}}): Please review your configuration (${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml"
+
       - name: Purge old Reference Image
         if: ${{ steps.helm-rollback.outcome == 'success' }}
         run: |
@@ -59,6 +69,7 @@ jobs:
           git config --global user.name "Alice Biometrics"          
           git add -u
           git commit -m "${{inputs.chart}} (${{inputs.environment}}): Remove old chart (${{inputs.chart}}/chart/values-${{inputs.environment}}.yaml.old)"
+
       - name: Push changes
         uses: alice-biometrics/github-push-action@master
         with:
