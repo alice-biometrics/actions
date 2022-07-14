@@ -30,7 +30,7 @@ jobs:
         run: gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
 
       - name: Install KubenNT
-        run: curl -sSL https://git.io/install-kubent
+        run: curl -sSL https://git.io/install-kubent > ./installer.sh ; sh -c ./installer.sh
 
       - name: Launch KubeNT
         run: kubent
