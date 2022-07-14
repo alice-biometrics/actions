@@ -1,0 +1,36 @@
+name: KubeNT
+
+on:
+  workflow_call:
+    secrets:
+      gke_key:
+        required: true
+      gke_project:
+        required: true
+      gke_zone:
+        required: true 
+      gke_cluster_prefix:
+        required: true
+
+jobs:
+  k8s-popeye-security-test:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: google-github-actions/setup-gcloud@v0.2.1
+        with:
+          project_id:  ${{ secrets.gke_project }} 
+          service_account_key: ${{ secrets.gke_key }}
+          export_default_credentials: true
+
+      - name: Gcloud Auth ${{ secrets.gke_project}}
+        run: gcloud auth configure-docker
+
+      - name: Gcloud generate Kubeconfig
+        run: gcloud container clusters get-credentials ${{secrets.gke_cluster_prefix}} --zone ${{secrets.gke_zone}} --project ${{secrets.gke_project}}
+
+      - name: Install KubenNT
+        run: sh -c "$(curl -sSL https://git.io/install-kubent)"
+
+      - name: Launch KubeNT
+        run: kubent
