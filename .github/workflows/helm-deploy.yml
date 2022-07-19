@@ -111,7 +111,7 @@ jobs:
         if: ${{ steps.helm-deploy.outcome == 'success' }}
         working-directory: ${{inputs.chart}}/chart
         run: |
-          git pull
+          git pull --rebase
           sed -ri 's/^(\s*)(version:.*$)/\1version: ${{inputs.version}}/' Chart.yaml
           git status
           if [[ -n $(git status -s -uno) ]]
